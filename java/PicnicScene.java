@@ -10,6 +10,7 @@
  ********************/
 
 import java.awt.*;        // import statements to make necessary classes available
+import java.awt.event.*;
 import java.awt.geom.*;
 import javax.swing.*;
 
@@ -23,7 +24,8 @@ public class PicnicScene extends JPanel {
     public static void main(String[] args) {
         JFrame window;
         window = new JFrame("Java: Picnic Time!");  // The parameter shows in the window title bar.
-        window.setContentPane(new PicnicScene()); // Show an instance of this class in main window pane
+        final PicnicScene panel = new PicnicScene(); // The drawing area.
+        window.setContentPane(panel); // Show an instance of this class in main window pane
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // End program when window closes.
         window.pack();  // Set window size based on the preferred sizes of its contents.
         window.setResizable(true); // Let user resize window.
@@ -31,12 +33,30 @@ public class PicnicScene extends JPanel {
 
         // Center window on screen.
         window.setLocation((screen.width - window.getWidth())/2, (screen.height - window.getHeight())/2);
+        
+        // Timer configuration for animation events and repaints.
+        final int timer_delay_60fps = 1000 / 16;  // Used by the animation timer for framerate.
+        final long startTime = System.currentTimeMillis();
+        Timer animationTimer = new Timer(timer_delay_60fps, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                panel.frameNumber++;
+                panel.elapsedTimeMillis = System.currentTimeMillis() - startTime;
+                panel.repaint();
+            }
+        });
+        
         window.setVisible(true); // Open the window, making it visible on the screen.
+        animationTimer.start(); // Start the animation running.
     }
     
     private float pixelSize;    // This is the measure of a pixel in the coordinate system
                                 // set up by calling the applyLimits method.  It can be used
                                 // for setting line widths, for example.
+
+    private int frameNumber;    // The current number of frames elasped during the program.
+                                // Used to determine how far along animations are.
+
+    private long elapsedTimeMillis;  // The time, in milliseconds, since the animation started.
     
     /**
      * This constructor sets up a PicnicScene when it is created.  Here, it
@@ -76,7 +96,7 @@ public class PicnicScene extends JPanel {
         * coordinate system.
         */
         
-        applyWindowToViewportTransformation(g2, -2, 6, -2, 6, true);
+        applyWindowToViewportTransformation(g2, 0, 10, 0, 10, true);
         
         /* Finish by drawing a few shapes as an example.  You can erase the rest of 
         * this subroutine and substitute your own drawing.
@@ -97,6 +117,7 @@ public class PicnicScene extends JPanel {
 
         // TODO: calls to additional functions to draw shapes and components
         drawBackground(g2);
+        drawSeesaw(g2, 4, 2);
 
         g2.setTransform(cs);  // Restore previous coordinate system
     }
@@ -109,6 +130,61 @@ public class PicnicScene extends JPanel {
         AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
         
         // TODO: implement drawing code and any other transformations
+
+        g2.setTransform(cs);  // Restore previous coordinate system
+    }
+
+    /**
+     * Draws the seesaw, with the two animated people on it.
+     * Composed of a green triangular base with a pink rectangle, and two people 
+     * facing each other.
+     * @param g2 The drawing context whose transform will be set.
+     * @param x The x-location for the midpoint of the bottom side of the triangular base.
+     * @param y The y-location for the midpoint of the bottom side of the triangular base.
+     */
+    private void drawSeesaw(Graphics2D g2, double x, double y) {
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+        
+        // move the transform to the location of the triangle
+        g2.translate(x, y);
+
+        // begin by creating the triangular base
+        Path2D poly = new Path2D.Double();
+        poly.moveTo(-1, 0);
+        poly.lineTo(0, 1.5);
+        poly.lineTo(1, 0);
+        poly.closePath();
+        g2.setPaint(new Color(58, 95, 11));
+        g2.fill(poly);
+
+        // move to the center of the seesaw bar (the point it rotates on)
+        g2.translate(0, 1.5);
+        // rotate the transform based on the current number of frames
+        // the rotation angles fall on the interval: [-45 degrees, 45 degrees]
+        g2.rotate(Math.sin(frameNumber * 0.25) * Math.PI / 6);
+        
+        // add the animated bar to the seesaw
+        g2.setPaint(new Color(200, 0, 200));
+        g2.fill(new Rectangle2D.Double(-3, -0.1, 6, 0.2));
+
+        // TODO: implement the animated people
+
+        g2.setTransform(cs);  // Restore previous coordinate system
+    }
+
+    /**
+     * Draws the seesaw, with the two animated people on it.
+     * Composed of lines and circles.
+     * The animation covers the legs bending as they reach the ground.
+     * @param g2 The drawing context whose transform will be set.
+     * @param x The x-location for the midpoint of the bottom side of the triangular base.
+     * @param y The y-location for the midpoint of the bottom side of the triangular base.
+     */
+    private void drawPerson(Graphics2D g2, double x, double y, boolean isAnimated) {
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+        
+        // TODO: implement drawing code and any other transformations
+        // TODO: implement animation
 
         g2.setTransform(cs);  // Restore previous coordinate system
     }
