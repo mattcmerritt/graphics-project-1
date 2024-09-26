@@ -180,6 +180,10 @@ public class PicnicScene extends JPanel {
     
         g2.setPaint(new Color(135, 206, 250));
         g2.fillRect(0, 5, 10, 5); 
+
+        g2.setPaint(new Color(117, 225, 0));
+        g2.fillRect(0, 0, 10, 5); 
+
         g2.setTransform(cs); 
     }    
 
