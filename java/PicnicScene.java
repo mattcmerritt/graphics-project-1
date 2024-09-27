@@ -42,7 +42,7 @@ public class PicnicScene extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 panel.birdX -= 0.1;
                 if(panel.birdX <= -1) {
-                    panel.birdX = 10;
+                    panel.birdX = 16;
                 }
                 panel.wingScaler += panel.wingDelta;
                 if(panel.wingScaler <= -1) {
@@ -118,7 +118,7 @@ public class PicnicScene extends JPanel {
          * coordinate system.
          */
 
-        applyWindowToViewportTransformation(g2, 0, 10, 0, 10, true);
+        applyWindowToViewportTransformation(g2, 0, 16, 0, 10, true);
 
         /*
          * Finish by drawing a few shapes as an example. You can erase the rest of
@@ -140,11 +140,11 @@ public class PicnicScene extends JPanel {
         // TODO: calls to additional functions to draw shapes and components
         drawBackground(g2);
         drawLake(g2); 
-        drawSun(g2, 6.5, 10);
-        drawBlanket(g2, 6, 1.5); // TODO: move up with screen resize
-        drawTree(g2, 8.5, 3);
-        drawTree(g2, 1.5, 3);
-        drawSeesaw(g2, 4, 2);
+        drawSun(g2, 11, 10);
+        drawBlanket(g2, 11.5, 2); // TODO: move up with screen resize
+        drawTree(g2, 14, 3);
+        drawTree(g2, 2, 3);
+        drawSeesaw(g2, 5, 1);
         drawBird(g2);
 
         g2.setTransform(cs); // Restore previous coordinate system
@@ -165,9 +165,9 @@ public class PicnicScene extends JPanel {
     private void drawLake(Graphics2D g2) {
         AffineTransform cs = g2.getTransform(); 
         g2.scale(1, 0.9);
-        g2.translate(1, 3.05);
+        g2.translate(2, 3.05);
         g2.setPaint(new Color(0, 0, 139)); 
-        g2.fillArc(0, 0, 8, 5, 0, 180); 
+        g2.fillArc(0, 0, 12, 5, 0, 180); 
         
     
         g2.setTransform(cs); 
@@ -183,10 +183,10 @@ public class PicnicScene extends JPanel {
         AffineTransform cs = g2.getTransform(); 
     
         g2.setPaint(new Color(135, 206, 250));
-        g2.fillRect(0, 5, 10, 5); 
+        g2.fillRect(0, 5, 16, 5); 
 
         g2.setPaint(new Color(117, 225, 0));
-        g2.fillRect(0, 0, 10, 5); 
+        g2.fillRect(0, 0, 16, 5); 
 
         g2.setTransform(cs); 
     }    
@@ -268,11 +268,11 @@ public class PicnicScene extends JPanel {
 
         g2.setPaint(new Color(255, 255, 0, 50));
         g2.fill(new Ellipse2D.Double(-1.5, -1.5, 3, 3));
-        g2.setPaint(new Color(255, 255, 0, 100));
+        g2.setPaint(new Color(255, 255, 0, 80));
         g2.fill(new Ellipse2D.Double(-1.25, -1.25, 2.5, 2.5));
-        g2.setPaint(new Color(255, 255, 0, 150));
+        g2.setPaint(new Color(255, 255, 0, 120));
         g2.fill(new Ellipse2D.Double(-1, -1, 2, 2));
-        g2.setPaint(new Color(255, 255, 0, 200));
+        g2.setPaint(new Color(255, 255, 0, 150));
         g2.fill(new Ellipse2D.Double(-0.75, -0.75, 1.5, 1.5));
         g2.setPaint(new Color(255, 255, 0, 250));
         g2.fill(new Ellipse2D.Double(-0.5, -0.5, 1, 1));
