@@ -141,7 +141,7 @@ public class PicnicScene extends JPanel {
         drawBackground(g2);
         drawLake(g2); 
         // drawSun(g2, 0, 0);
-        // drawBlanket(g2, 0, 0);
+        drawBlanket(g2, 6, 1.5); // TODO: move up with screen resize
         drawTree(g2, 8.5, 3);
         drawTree(g2, 1.5, 3);
         drawSeesaw(g2, 4, 2);
@@ -266,6 +266,8 @@ public class PicnicScene extends JPanel {
         // move the transform to the location of the object
         g2.translate(x, y);
 
+        g2.setPaint(Color.YELLOW);
+
         g2.setTransform(cs); // Restore previous coordinate system
     }
 
@@ -300,9 +302,8 @@ public class PicnicScene extends JPanel {
         g2.fill(poly);
 
         // draw leaves
-        g2.translate(-0.5, 0.7); // shift slightly so leaves appear centered on tree
         g2.setPaint(new Color(58, 95, 11));
-        g2.fillOval(-1, 0, 3, 3);
+        g2.fill(new Ellipse2D.Double(-1.5, 0.7, 3, 3));
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
@@ -323,14 +324,26 @@ public class PicnicScene extends JPanel {
 
         // draw blanket
         Path2D poly = new Path2D.Double();
-        poly.moveTo(-1, 0);
-        poly.lineTo(0, 1.5);
-        poly.lineTo(1, 0);
+        poly.moveTo(-2, -1);
+        poly.lineTo(0, -1);
+        poly.lineTo(2, 1);
+        poly.lineTo(0, 1);
         poly.closePath();
 
+        g2.setPaint(new Color(207, 185, 151));
+        g2.fill(poly);
+
+        // draw basket
+        g2.setPaint(new Color(92, 77, 57));
+        g2.draw(new Arc2D.Double(1, 1, 0.5, 0.5, 180, 180, Arc2D.OPEN));
+        g2.fill(new Rectangle2D.Double(0.9, 0.75, 0.7, 0.5));
+
         // draw apple
+        g2.setPaint(Color.RED);
+        g2.fill(new Ellipse2D.Double(-0.4, 0.4, 0.1, 0.1));
 
         // draw person
+        // TODO: add person here
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
