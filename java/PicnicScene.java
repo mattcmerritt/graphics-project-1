@@ -140,7 +140,7 @@ public class PicnicScene extends JPanel {
         // TODO: calls to additional functions to draw shapes and components
         drawBackground(g2);
         drawLake(g2); 
-        // drawSun(g2, 0, 0);
+        drawSun(g2, 6.5, 10);
         drawBlanket(g2, 6, 1.5); // TODO: move up with screen resize
         drawTree(g2, 8.5, 3);
         drawTree(g2, 1.5, 3);
@@ -266,7 +266,16 @@ public class PicnicScene extends JPanel {
         // move the transform to the location of the object
         g2.translate(x, y);
 
-        g2.setPaint(Color.YELLOW);
+        g2.setPaint(new Color(255, 255, 0, 50));
+        g2.fill(new Ellipse2D.Double(-1.5, -1.5, 3, 3));
+        g2.setPaint(new Color(255, 255, 0, 100));
+        g2.fill(new Ellipse2D.Double(-1.25, -1.25, 2.5, 2.5));
+        g2.setPaint(new Color(255, 255, 0, 150));
+        g2.fill(new Ellipse2D.Double(-1, -1, 2, 2));
+        g2.setPaint(new Color(255, 255, 0, 200));
+        g2.fill(new Ellipse2D.Double(-0.75, -0.75, 1.5, 1.5));
+        g2.setPaint(new Color(255, 255, 0, 250));
+        g2.fill(new Ellipse2D.Double(-0.5, -0.5, 1, 1));
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
