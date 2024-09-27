@@ -82,7 +82,7 @@ public class PicnicScene extends JPanel {
      * which will be used by the pack() command in the main() routine.)
      */
     public PicnicScene() {
-        setPreferredSize(new Dimension(1000, 1000)); // Set size of drawing area, in pixels.
+        setPreferredSize(new Dimension(1600, 1000)); // Set size of drawing area, in pixels.
     }
 
     /**
@@ -140,6 +140,10 @@ public class PicnicScene extends JPanel {
         // TODO: calls to additional functions to draw shapes and components
         drawBackground(g2);
         drawLake(g2); 
+        // drawSun(g2, 0, 0);
+        // drawBlanket(g2, 0, 0);
+        drawTree(g2, 8.5, 3);
+        drawTree(g2, 1.5, 3);
         drawSeesaw(g2, 4, 2);
         drawBird(g2);
 
@@ -244,6 +248,89 @@ public class PicnicScene extends JPanel {
 
         // TODO: implement drawing code and any other transformations
         // TODO: implement animation
+
+        g2.setTransform(cs); // Restore previous coordinate system
+    }
+
+    /**
+     * Draws the sun, with five layers that fluctuate slightly.
+     * Composed of five yellow circles of decreasing alpha values.
+     * 
+     * @param g2 The drawing context whose transform will be set.
+     * @param x  The x-location for the midpoint of the sun.
+     * @param y  The y-location for the midpoint of the sun.
+     */
+    private void drawSun(Graphics2D g2, double x, double y) {
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+
+        // move the transform to the location of the object
+        g2.translate(x, y);
+
+        g2.setTransform(cs); // Restore previous coordinate system
+    }
+
+    /**
+     * Draws the sun, with five layers that fluctuate slightly.
+     * Composed of a green circle and a polygonal path shape.
+     * 
+     * @param g2 The drawing context whose transform will be set.
+     * @param x  The x-location for the midpoint of the sun.
+     * @param y  The y-location for the midpoint of the sun.
+     */
+    private void drawTree(Graphics2D g2, double x, double y) {
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+
+        // move the transform to the location of the object
+        g2.translate(x, y);
+
+        // draw trunk
+        Path2D poly = new Path2D.Double();
+        poly.moveTo(-0.5, 2); // top left
+        poly.lineTo(-0.5, 1.5);
+        poly.curveTo(-0.5, -2, -1, -2, -1, -2);
+        poly.lineTo(-0.25, -1.75);
+        poly.lineTo(0.15, -2.25);
+        poly.lineTo(0.4, -1.75);
+        poly.lineTo(1, -2);
+        poly.curveTo(1, -2, 0.5, -2, 0.5, 1.5);
+        poly.lineTo(0.5, 2); // top right
+        poly.closePath();
+
+        g2.setPaint(new Color(83, 53, 10));
+        g2.fill(poly);
+
+        // draw leaves
+        g2.translate(-0.5, 0.7); // shift slightly so leaves appear centered on tree
+        g2.setPaint(new Color(58, 95, 11));
+        g2.fillOval(-1, 0, 3, 3);
+
+        g2.setTransform(cs); // Restore previous coordinate system
+    }
+
+    /**
+     * Draws the blanket, with a person and an apple on it.
+     * Composed of a tan polygon, red circle, and person.
+     * 
+     * @param g2 The drawing context whose transform will be set.
+     * @param x  The x-location for the midpoint of the sun.
+     * @param y  The y-location for the midpoint of the sun.
+     */
+    private void drawBlanket(Graphics2D g2, double x, double y) {
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+
+        // move the transform to the location of the object
+        g2.translate(x, y);
+
+        // draw blanket
+        Path2D poly = new Path2D.Double();
+        poly.moveTo(-1, 0);
+        poly.lineTo(0, 1.5);
+        poly.lineTo(1, 0);
+        poly.closePath();
+
+        // draw apple
+
+        // draw person
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
