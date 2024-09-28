@@ -124,7 +124,7 @@ public class PicnicScene extends JPanel {
         // calls to additional functions to draw shapes and components
         drawBackground(g2);
         drawLake(g2); 
-        drawSun(g2, 11, 10);
+        drawSun(g2, 11, 10, 3, 0.005);
         drawBird(g2);
         drawBlanket(g2, 11.5, 2); // TODO: move up with screen resize
         drawTree(g2, 14, 3);
@@ -389,26 +389,51 @@ public class PicnicScene extends JPanel {
      * Draws the sun, with five layers that fluctuate slightly.
      * Composed of five yellow circles of decreasing alpha values.
      * 
-     * @param g2 The drawing context whose transform will be set.
-     * @param x  The x-location for the midpoint of the sun.
-     * @param y  The y-location for the midpoint of the sun.
+     * @param g2            The drawing context whose transform will be set.
+     * @param x             The x-location for the midpoint of the sun.
+     * @param y             The y-location for the midpoint of the sun.
+     * @param alphaRange    The largest possible random value for the alpha.
+     *                      Range of alpha values will be 
+     *                      (base value - alphaRange, base value + alphaRange).
+     * @param sizeRange     The largest possible random value for the size.
+     *                      Range of size values will be 
+     *                      (base value - sizeRange, base value + sizeRange).
      */
-    private void drawSun(Graphics2D g2, double x, double y) {
+    private void drawSun(Graphics2D g2, double x, double y, int alphaRange, double sizeRange) {
         AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
 
         // move the transform to the location of the object
         g2.translate(x, y);
 
-        g2.setPaint(new Color(255, 255, 0, 50));
-        g2.fill(new Ellipse2D.Double(-1.5, -1.5, 3, 3));
-        g2.setPaint(new Color(255, 255, 0, 80));
-        g2.fill(new Ellipse2D.Double(-1.25, -1.25, 2.5, 2.5));
-        g2.setPaint(new Color(255, 255, 0, 120));
-        g2.fill(new Ellipse2D.Double(-1, -1, 2, 2));
-        g2.setPaint(new Color(255, 255, 0, 150));
-        g2.fill(new Ellipse2D.Double(-0.75, -0.75, 1.5, 1.5));
-        g2.setPaint(new Color(255, 255, 0, 250));
-        g2.fill(new Ellipse2D.Double(-0.5, -0.5, 1, 1));
+        // outermost circle
+        int alphaFluctuation = (int) (Math.random() * (alphaRange * 2) - alphaRange); // range: (base value - alphaRange, base value + alphaRange)
+        double sizeFluctuation = Math.random() * (sizeRange * 2) - sizeRange; // range: (base value - sizeRange, base value + sizeRange)
+        g2.setPaint(new Color(255, 255, 0, 50 + alphaFluctuation));
+        g2.fill(new Ellipse2D.Double(-1.5 - (sizeFluctuation / 2.0), -1.5 - (sizeFluctuation / 2.0), 3 + sizeFluctuation, 3 + sizeFluctuation));
+
+        // second largest circle
+        alphaFluctuation = (int) (Math.random() * (alphaRange * 2) - alphaRange); // range: (base value - alphaRange, base value + alphaRange)
+        sizeFluctuation = Math.random() * (sizeRange * 2) - sizeRange; // range: (base value - sizeRange, base value + sizeRange)
+        g2.setPaint(new Color(255, 255, 0, 80 + alphaFluctuation));
+        g2.fill(new Ellipse2D.Double(-1.25 - (sizeFluctuation / 2.0), -1.25 - (sizeFluctuation / 2.0), 2.5 + sizeFluctuation, 2.5 + sizeFluctuation));
+
+        // middle circle
+        alphaFluctuation = (int) (Math.random() * (alphaRange * 2) - alphaRange); // range: (base value - alphaRange, base value + alphaRange)
+        sizeFluctuation = Math.random() * (sizeRange * 2) - sizeRange; // range: (base value - sizeRange, base value + sizeRange)
+        g2.setPaint(new Color(255, 255, 0, 120 + alphaFluctuation));
+        g2.fill(new Ellipse2D.Double(-1 - (sizeFluctuation / 2.0), -1 - (sizeFluctuation / 2.0), 2 + sizeFluctuation, 2 + sizeFluctuation));
+
+        // fourth largest circle
+        alphaFluctuation = (int) (Math.random() * (alphaRange * 2) - alphaRange); // range: (base value - alphaRange, base value + alphaRange)
+        sizeFluctuation = Math.random() * (sizeRange * 2) - sizeRange; // range: (base value - sizeRange, base value + sizeRange)
+        g2.setPaint(new Color(255, 255, 0, 150 + alphaFluctuation));
+        g2.fill(new Ellipse2D.Double(-0.75 - (sizeFluctuation / 2.0), -0.75 - (sizeFluctuation / 2.0), 1.5 + sizeFluctuation, 1.5 + sizeFluctuation));
+
+        // innermost circle
+        alphaFluctuation = (int) (Math.random() * (alphaRange * 2) - alphaRange); // range: (base value - alphaRange, base value + alphaRange)
+        sizeFluctuation = Math.random() * (sizeRange * 2) - sizeRange; // range: (base value - sizeRange, base value + sizeRange)
+        g2.setPaint(new Color(255, 255, 0, 250 + alphaFluctuation));
+        g2.fill(new Ellipse2D.Double(-0.5 - (sizeFluctuation / 2.0), -0.5 - (sizeFluctuation / 2.0), 1 + sizeFluctuation, 1 + sizeFluctuation));
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
