@@ -36,7 +36,7 @@ public class PicnicScene extends JPanel {
         window.setLocation((screen.width - window.getWidth()) / 2, (screen.height - window.getHeight()) / 2);
 
         // Timer configuration for animation events and repaints.
-        final int timer_delay_60fps = 1000 / 16; // Used by the animation timer for framerate.
+        final int timer_delay_60fps = 1000 / 60; // Used by the animation timer for framerate.
         final long startTime = System.currentTimeMillis();
         Timer animationTimer = new Timer(timer_delay_60fps, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -65,7 +65,7 @@ public class PicnicScene extends JPanel {
 
     private float pixelSize; // This is the measure of a pixel in the coordinate system
                              // set up by calling the applyLimits method. It can be used
-                             // for setting line widths, for example.
+                             // for setting line widths, for example.6
 
     private int frameNumber; // The current number of frames elasped during the program.
                              // Used to determine how far along animations are.
@@ -137,7 +137,8 @@ public class PicnicScene extends JPanel {
         // Scene version 1
         AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
         g2.scale(1, 1); // No scaling yet, but setting it up to make a tad bigger
-        // TODO: calls to additional functions to draw shapes and components
+        
+        // calls to additional functions to draw shapes and components
         drawBackground(g2);
         drawLake(g2); 
         drawSun(g2, 11, 10);
@@ -221,35 +222,103 @@ public class PicnicScene extends JPanel {
         g2.translate(0, 1.5);
         // rotate the transform based on the current number of frames
         // the rotation angles fall on the interval: [-45 degrees, 45 degrees]
-        g2.rotate(Math.sin(frameNumber * 0.25) * Math.PI / 6);
+        g2.rotate(Math.sin(frameNumber * 0.15) * Math.PI / 12);
 
         // add the animated bar to the seesaw
         g2.setPaint(new Color(200, 0, 200));
         g2.fill(new Rectangle2D.Double(-3, -0.1, 6, 0.2));
 
-        // TODO: implement the animated people
+        // animated people
+        g2.translate(2.5, 0); // move canvas to the person's location
+        g2.rotate(-Math.sin(frameNumber * 0.15) * Math.PI / 12); // undo rotation
+
+        // to determine the location of the floor where the person's legs begin to bend,
+        // we need to transform the point at the ground below the person
+        // TODO: perform calculations to allow for bending
+
+        drawPerson(g2, 0, 0, true, 0, true, 0, 1);
+        
+        g2.rotate(Math.sin(frameNumber * 0.15) * Math.PI / 12); // reapply rotation
+        g2.translate(-5, 0); // move canvas to the second person's location
+        g2.rotate(-Math.sin(frameNumber * 0.15) * Math.PI / 12); // undo rotation again
+        drawPerson(g2, 0, 0, true, 0, false, 0, 1);
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
 
     /**
-     * Draws the seesaw, with the two animated people on it.
-     * Composed of lines and circles.
-     * The animation covers the legs bending as they reach the ground.
+     * Draws a person, either animated or stationary.
+     * Composed of lines and circles. 
+     * The people are drawn with the pivot point located at the bottom of the body.
+     * The animation covers the legs bending as they reach the ground, as well as the person
+     * keeping their hands on the seesaw at all times.
      * 
-     * @param g2 The drawing context whose transform will be set.
-     * @param x  The x-location for the midpoint of the bottom side of the
-     *           triangular base.
-     * @param y  The y-location for the midpoint of the bottom side of the
-     *           triangular base.
+     * @param g2            The drawing context whose transform will be set.
+     * @param x             The x-location for the midpoint of the bottom side of the
+     *                      triangular base.
+     * @param y             The y-location for the midpoint of the bottom side of the
+     *                      triangular base.
+     * @param isAnimated    Determines if the hands and legs of the person need to move.
+     *                      (Used by both people on the seesaw.)
+     * @param groundY       The vertical height that the leg stops moving down at, setting
+     *                      when the leg starts bending. (Used by both people on the seesaw.)
+     * @param facingLeft    Detemines which direction to draw the person. If animated, 
+     *                      this will also determine when they move up or down.
+     *                      (Used by the man on the right of the seesaw and the blanket.)
+     * @param rotationAngle The amount that the coordinate system should be rotated before
+     *                      drawing. (Used for the man on the blanket resting at an angle.)
+     * @param scaleFactor   The value used to scale the entire person. Preserves aspect ratio.
+     *                      (Used for the man on the blanket.)
      */
-    private void drawPerson(Graphics2D g2, double x, double y, boolean isAnimated) {
+    private void drawPerson(Graphics2D g2, double x, double y, boolean isAnimated, double groundY, boolean facingLeft, double rotationAngle, double scaleFactor) {
         AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+        Stroke initialStroke = g2.getStroke(); // Saving the current stroke to restore later
 
-        // TODO: implement drawing code and any other transformations
-        // TODO: implement animation
+        // position the coordinate system to account for the starting position
+        g2.translate(x, y);
+        g2.rotate(rotationAngle);
+        g2.scale(scaleFactor, scaleFactor);
+
+        BasicStroke personStroke = new BasicStroke(0.1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
+        g2.setPaint(Color.BLACK);
+        g2.setStroke(personStroke);
+        g2.draw(new Line2D.Double(0, 0, 0, 1.5));
+
+        // for animated person, the hand should stay attached to the seesaw beam
+        if (isAnimated) {
+            // need to calculate the y-coordinate for the person's hand based on the rotation
+            double relativeHandX = 0.5 * (facingLeft ? -1 : 1);
+            double relativeHandY = 0;
+            double handY = Math.sin(Math.sin(frameNumber * 0.15) * Math.PI / 12) * relativeHandX + Math.cos(Math.sin(frameNumber * 0.15) * Math.PI / 12) * relativeHandY;
+
+            // hand connecting to the seesaw
+            g2.draw(new Line2D.Double(0, 1.25, 0.5 * (facingLeft ? -1 : 1), handY));
+        }
+        // otherwise, just maintain the angle
+        else {
+            g2.draw(new Line2D.Double(0, 1.25, 0.75 * (facingLeft ? -1 : 1), 0.25));
+        } 
+        
+        // drawing the head with outline and fill
+        Ellipse2D.Double head = new Ellipse2D.Double(-0.75, 1.5, 1.5, 1.5);
+        g2.setPaint(Color.WHITE);
+        g2.fill(head);
+        g2.setPaint(Color.BLACK);
+        g2.draw(head);
+
+        // drawing the legs of the person
+        if (isAnimated) {
+            // TODO: perform calculations to allow for bending
+            g2.draw(new Line2D.Double(0, 0, 0.75 * (facingLeft ? -1 : 1), -0.75));
+            g2.draw(new Line2D.Double(0.75 * (facingLeft ? -1 : 1), -0.75, 0, -1.5));
+        }
+        else {
+            g2.draw(new Line2D.Double(0, 0, 0.75 * (facingLeft ? -1 : 1), -0.75));
+            g2.draw(new Line2D.Double(0.75 * (facingLeft ? -1 : 1), -0.75, 0, -1.5));
+        }
 
         g2.setTransform(cs); // Restore previous coordinate system
+        g2.setStroke(initialStroke); // Restore previous stroke
     }
 
     /**
@@ -352,7 +421,7 @@ public class PicnicScene extends JPanel {
         g2.fill(new Ellipse2D.Double(-0.4, 0.4, 0.1, 0.1));
 
         // draw person
-        // TODO: add person here
+        drawPerson(g2, 0, 0, false, 0, true, -Math.PI / 4, 0.35);
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
