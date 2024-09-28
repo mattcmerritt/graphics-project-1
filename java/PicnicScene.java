@@ -305,8 +305,25 @@ public class PicnicScene extends JPanel {
             GeneralPath body = new GeneralPath();
             body.moveTo(0, 1.5);
             body.lineTo(0, 0);
-            body.lineTo(0.5 * (facingLeft ? -1 : 1), groundY / 2);
-            body.lineTo(0, groundY);
+
+            // only allow the legs to go a set distance down, but maintain the same length
+            double extendedLegHeight = 1.6;
+            double extendedLegX = 0.2;
+            double legSegmentLength = Math.sqrt((extendedLegX * extendedLegX) + (extendedLegHeight / 2 * extendedLegHeight / 2));
+
+            // if the height to the ground is less than the max leg height, use the full height to draw the legs
+            // the bend location will depend on how low to the ground the person is, and it must preserve the length
+            // of the leg segments
+            if (Math.abs(groundY) < extendedLegHeight) {
+                double bendX = Math.sqrt((legSegmentLength * legSegmentLength) - (groundY / 2 * groundY / 2));
+                body.lineTo(bendX * (facingLeft ? -1 : 1), groundY / 2);
+                body.lineTo(0, groundY);
+            }
+            // otherwise, stretch the leg down the full fixed amount
+            else {
+                body.lineTo(0.2 * (facingLeft ? -1 : 1), -extendedLegHeight / 2);
+                body.lineTo(0 * (facingLeft ? -1 : 1), -extendedLegHeight);
+            }
 
             // need to calculate the y-coordinate for the person's hand based on the rotation
             double seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
