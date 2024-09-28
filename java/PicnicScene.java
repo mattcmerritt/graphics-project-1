@@ -210,45 +210,54 @@ public class PicnicScene extends JPanel {
         g2.translate(x, y);
 
         // begin by creating the triangular base
+        double baseHeight = 1.5;
+        double baseWidth = 2;
         Path2D poly = new Path2D.Double();
-        poly.moveTo(-1, 0);
-        poly.lineTo(0, 1.5);
-        poly.lineTo(1, 0);
+        poly.moveTo(-baseWidth / 2, 0);
+        poly.lineTo(0, baseHeight);
+        poly.lineTo(baseWidth / 2, 0);
         poly.closePath();
         g2.setPaint(new Color(58, 95, 11));
         g2.fill(poly);
 
         // move to the center of the seesaw bar (the point it rotates on)
-        g2.translate(0, 1.5);
+        g2.translate(0, baseHeight);
         // rotate the transform based on the current number of frames
-        // the rotation angles fall on the interval: [-45 degrees, 45 degrees]
-        g2.rotate(Math.sin(frameNumber * 0.15) * Math.PI / 12);
+        // the number inside the sine function can be adjusted to control speed, 
+        // and the angle controls the amplitude of the rotation
+        double seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+        g2.rotate(seesawRotation);
 
         // add the animated bar to the seesaw
         g2.setPaint(new Color(200, 0, 200));
         g2.fill(new Rectangle2D.Double(-3, -0.1, 6, 0.2));
 
-        // animated people
-        g2.translate(2.5, 0); // move canvas to the person's location
-        g2.rotate(-Math.sin(frameNumber * 0.15) * Math.PI / 12); // undo rotation
+        // add animated people
+        final double distanceFromCenter = 2.5;
 
-        // to determine the location of the floor where the person's legs begin to bend,
-        // we need to transform the point at the ground below the person
-        // TODO: perform calculations to allow for bending
+        g2.translate(distanceFromCenter, 0); // move along seesaw beam to the person's location
+        g2.rotate(-seesawRotation); // undo rotation
 
-        drawPerson(g2, 0, 0, true, 0, true, 0, 1);
+        // calculate how far up or down the seesaw has moved 
+        // (used to find the ground relative to the person)
+        double seesawDisplacementY = distanceFromCenter * Math.sin(seesawRotation);
+
+        // for the person on the right, the ground is the opposite of the displacement, minus the base height as well
+        drawPerson(g2, 0, 0, true, (-seesawDisplacementY - baseHeight), true, 0, 1);
         
-        g2.rotate(Math.sin(frameNumber * 0.15) * Math.PI / 12); // reapply rotation
-        g2.translate(-5, 0); // move canvas to the second person's location
-        g2.rotate(-Math.sin(frameNumber * 0.15) * Math.PI / 12); // undo rotation again
-        drawPerson(g2, 0, 0, true, 0, false, 0, 1);
+        g2.rotate(seesawRotation); // reapply rotation to move along beam
+        g2.translate(-2 * distanceFromCenter, 0); // move along seesaw beam to the second person's location
+        g2.rotate(-seesawRotation); // undo rotation again
+        
+        // for the person on the left, the ground is the displacement, minus the base height as well
+        drawPerson(g2, 0, 0, true, (seesawDisplacementY - baseHeight), false, 0, 1);
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
 
     /**
      * Draws a person, either animated or stationary.
-     * Composed of lines and circles. 
+     * Composed of lines on a path and circles. 
      * The people are drawn with the pivot point located at the bottom of the body.
      * The animation covers the legs bending as they reach the ground, as well as the person
      * keeping their hands on the seesaw at all times.
@@ -279,25 +288,9 @@ public class PicnicScene extends JPanel {
         g2.rotate(rotationAngle);
         g2.scale(scaleFactor, scaleFactor);
 
+        // setting up the stroke for drawing the body
         BasicStroke personStroke = new BasicStroke(0.1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
-        g2.setPaint(Color.BLACK);
         g2.setStroke(personStroke);
-        g2.draw(new Line2D.Double(0, 0, 0, 1.5));
-
-        // for animated person, the hand should stay attached to the seesaw beam
-        if (isAnimated) {
-            // need to calculate the y-coordinate for the person's hand based on the rotation
-            double relativeHandX = 0.5 * (facingLeft ? -1 : 1);
-            double relativeHandY = 0;
-            double handY = Math.sin(Math.sin(frameNumber * 0.15) * Math.PI / 12) * relativeHandX + Math.cos(Math.sin(frameNumber * 0.15) * Math.PI / 12) * relativeHandY;
-
-            // hand connecting to the seesaw
-            g2.draw(new Line2D.Double(0, 1.25, 0.5 * (facingLeft ? -1 : 1), handY));
-        }
-        // otherwise, just maintain the angle
-        else {
-            g2.draw(new Line2D.Double(0, 1.25, 0.75 * (facingLeft ? -1 : 1), 0.25));
-        } 
         
         // drawing the head with outline and fill
         Ellipse2D.Double head = new Ellipse2D.Double(-0.75, 1.5, 1.5, 1.5);
@@ -306,15 +299,47 @@ public class PicnicScene extends JPanel {
         g2.setPaint(Color.BLACK);
         g2.draw(head);
 
-        // drawing the legs of the person
+        // drawing the body of the person as a single path
         if (isAnimated) {
-            // TODO: perform calculations to allow for bending
-            g2.draw(new Line2D.Double(0, 0, 0.75 * (facingLeft ? -1 : 1), -0.75));
-            g2.draw(new Line2D.Double(0.75 * (facingLeft ? -1 : 1), -0.75, 0, -1.5));
+            // configuring the path with the bend for the legs and the arms
+            GeneralPath body = new GeneralPath();
+            body.moveTo(0, 1.5);
+            body.lineTo(0, 0);
+            body.lineTo(0.5 * (facingLeft ? -1 : 1), groundY / 2);
+            body.lineTo(0, groundY);
+
+            // need to calculate the y-coordinate for the person's hand based on the rotation
+            double seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+            double relativeHandX = 0.5 * (facingLeft ? -1 : 1);
+            double relativeHandY = 0;
+            double handY = Math.sin(seesawRotation) * relativeHandX + Math.cos(seesawRotation) * relativeHandY;
+
+            // add the arms and hands to the path
+            body.moveTo(0, 1.25);
+            // hand connecting to the seesaw
+            body.lineTo(0.5 * (facingLeft ? -1 : 1), handY);
+
+            g2.setPaint(Color.BLACK);
+            g2.draw(body);
+
+            // debug points to show where the floor is located
+            // g2.setPaint(Color.MAGENTA);
+            // g2.draw(new Ellipse2D.Double(-0.1, groundY - 0.1, 0.2, 0.2));
         }
         else {
-            g2.draw(new Line2D.Double(0, 0, 0.75 * (facingLeft ? -1 : 1), -0.75));
-            g2.draw(new Line2D.Double(0.75 * (facingLeft ? -1 : 1), -0.75, 0, -1.5));
+            // configuring the path with the bend for the legs
+            GeneralPath body = new GeneralPath();
+            body.moveTo(0, 1.5);
+            body.lineTo(0, 0);
+            body.lineTo(0.75 * (facingLeft ? -1 : 1), -0.75);
+            body.lineTo(0, -1.5);
+
+            // adding arms
+            body.moveTo(0, 1.25);
+            body.lineTo(0.75 * (facingLeft ? -1 : 1), 0.25);
+
+            g2.setPaint(Color.BLACK);
+            g2.draw(body);
         }
 
         g2.setTransform(cs); // Restore previous coordinate system
