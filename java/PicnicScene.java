@@ -40,19 +40,6 @@ public class PicnicScene extends JPanel {
         final long startTime = System.currentTimeMillis();
         Timer animationTimer = new Timer(timer_delay_60fps, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                panel.birdX -= 0.1;
-                if(panel.birdX <= -1) {
-                    panel.birdX = 16;
-                }
-                panel.wingScaler += panel.wingDelta;
-                if(panel.wingScaler <= -1) {
-                    panel.wingScaler = -1;
-                    panel.wingDelta = -panel.wingDelta;
-                } else if(panel.wingScaler >= 1) {
-                    panel.wingScaler = 1;
-                    panel.wingDelta = -panel.wingDelta;
-                }
-                panel.birdY -= 0.3 * panel.wingDelta;
                 panel.frameNumber++;
                 panel.elapsedTimeMillis = System.currentTimeMillis() - startTime;
                 panel.repaint();
@@ -71,10 +58,6 @@ public class PicnicScene extends JPanel {
                              // Used to determine how far along animations are.
 
     private long elapsedTimeMillis; // The time, in milliseconds, since the animation started.
-    private double birdX = 6;
-    private double birdY = 8;
-    private double wingScaler = 1;
-    private double wingDelta = -0.1;
 
     /**
      * This constructor sets up a PicnicScene when it is created. Here, it
@@ -142,41 +125,80 @@ public class PicnicScene extends JPanel {
         drawBackground(g2);
         drawLake(g2); 
         drawSun(g2, 11, 10);
+        drawBird(g2);
         drawBlanket(g2, 11.5, 2); // TODO: move up with screen resize
         drawTree(g2, 14, 3);
         drawTree(g2, 2, 3);
         drawSeesaw(g2, 5, 1);
-        drawBird(g2);
+        
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
 
+    /**
+     * Draws the bird using two different arcs.
+     * It is animated by adjusting the location of the control points.
+     * 
+     * @param g2 The drawing context whose transform will be set.
+     */
     private void drawBird(Graphics2D g2) {
-        AffineTransform cs = g2.getTransform();
+        AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
+        Stroke initialStroke = g2.getStroke(); // Saving the current stroke to restore later
+
+        // bird will cross the screen every 3 seconds, 180 frames are needed to cross
+        // horizontally, the bird should cover 20 units with 2 units off screen on both sides,
+        // and should start in the center
+        int framesPerLoop = 100 * 60;
+        double birdX = ((frameNumber + framesPerLoop / 2) % framesPerLoop) / (double) framesPerLoop * 20.0 - 2;
+        
+        // bird will fly in a wave pattern through the sky vertically
+        // the factor out front adjusts how high and low the bird goes,
+        // and the factor inside adjusts how fast it swings up and down
+        double birdY = 0.5 * Math.sin(frameNumber * 0.01) + 7.5;
+
+        // adjust coordinate system to center bird
         g2.translate(birdX, birdY);
-        g2.scale(0.25, 0.25 * wingScaler);
-        g2.setStroke(new BasicStroke(10 * pixelSize));
+        
+        // bounds for the bird wing length and height
+        double birdWingHeight = 0.1;
+        double birdWingLength = 0.2;
+
+        // drawing the bird with arcs
+        Path2D birdPath = new Path2D.Double();
+        birdPath.moveTo(0, 0);
+        birdPath.curveTo(birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+        birdPath.moveTo(0, 0);
+        birdPath.curveTo(-birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+
+        // adjusting arc size and color
+        BasicStroke birdStroke = new BasicStroke(3 * pixelSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        g2.setStroke(birdStroke);
         g2.setPaint(Color.BLACK); 
-        g2.drawArc(0, -1, 4, 2, 180, 90);
-        g2.scale(-1, 1);
-        g2.drawArc(0, -1, 4, 2, 180, 90);
-        g2.setTransform(cs); 
+        g2.draw(birdPath);
+
+        g2.setTransform(cs); // Restore previous coordinate system
+        g2.setStroke(initialStroke); // Restore previous stroke
     }
 
+    /**
+     * Draws the lake using a filled blue arc.
+     * 
+     * @param g2 The drawing context whose transform will be set.
+     */
     private void drawLake(Graphics2D g2) {
         AffineTransform cs = g2.getTransform(); 
+
         g2.scale(1, 0.9);
         g2.translate(2, 3.05);
-        g2.setPaint(new Color(0, 0, 139)); 
+        g2.setPaint(new Color(0, 15, 255)); 
         g2.fillArc(0, 0, 12, 5, 0, 180); 
         
-    
         g2.setTransform(cs); 
     }
     
 
     /**
-     * Example function template, currently unimplemented
+     * Draws the light blue sky and the bright green grass using rectangles.
      * 
      * @param g2 The drawing context whose transform will be set.
      */
