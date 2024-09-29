@@ -392,9 +392,6 @@ public class PicnicScene extends JPanel {
      * @param g2            The drawing context whose transform will be set.
      * @param x             The x-location for the midpoint of the sun.
      * @param y             The y-location for the midpoint of the sun.
-     * @param alphaRange    The largest possible random value for the alpha.
-     *                      Range of alpha values will be 
-     *                      (base value - alphaRange, base value + alphaRange).
      * @param sizeRange     The largest possible random value for the size.
      *                      Range of size values will be 
      *                      (base value - sizeRange, base value + sizeRange).
