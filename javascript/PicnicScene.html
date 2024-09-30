@@ -673,6 +673,14 @@
                 setTimeout(callback, 1000/60);    
             }
         }
+
+        // TODO: determine if this is correct way to achieve this.
+        // Adding the timeout for all browsers, not just IE9.
+        // This allows for controlling framerate.
+        window.requestAnimationFrame = function(callback) {
+            setTimeout(callback, 1000/60);    
+        }
+
         requestAnimationFrame(doFrame);
     }
 </script>

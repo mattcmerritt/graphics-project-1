@@ -42,6 +42,9 @@ public class PicnicScene extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 panel.frameNumber++;
                 panel.elapsedTimeMillis = System.currentTimeMillis() - startTime;
+                // TODO: Determine why Java is running significantly slower than expected.
+                // This should return 60, but it is giving roughly 32 FPS instead.
+                // System.out.println(panel.frameNumber / (panel.elapsedTimeMillis / 1000.0));
                 panel.repaint();
             }
         });
