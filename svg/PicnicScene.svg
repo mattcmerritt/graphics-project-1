@@ -29,9 +29,9 @@
 
     <!-- sun -->
     <circle cx="1100" cy="0" r="150" fill="#FFFF00" fill-opacity="0.2" />
-    <circle cx="1100" cy="0" r="125" fill="#FFFF00" fill-opacity="0.4" />
-    <circle cx="1100" cy="0" r="100" fill="#FFFF00" fill-opacity="0.6" />
-    <circle cx="1100" cy="0" r="75" fill="#FFFF00" fill-opacity="0.8" />
+    <circle cx="1100" cy="0" r="125" fill="#FFFF00" fill-opacity="0.3" />
+    <circle cx="1100" cy="0" r="100" fill="#FFFF00" fill-opacity="0.4" />
+    <circle cx="1100" cy="0" r="75" fill="#FFFF00" fill-opacity="0.5" />
     <circle cx="1100" cy="0" r="50" fill="#FFFF00" fill-opacity="1" />
 
     <!-- bird -->
