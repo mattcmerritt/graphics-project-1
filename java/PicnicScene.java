@@ -126,11 +126,10 @@ public class PicnicScene extends JPanel {
         drawLake(g2); 
         drawSun(g2, 11, 10, 0.25);
         drawBird(g2);
-        drawBlanket(g2, 11.5, 2); // TODO: move up with screen resize
+        drawBlanket(g2, 11.5, 2);
         drawTree(g2, 14, 3);
         drawTree(g2, 2, 3);
         drawSeesaw(g2, 5, 1);
-        
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
@@ -315,7 +314,7 @@ public class PicnicScene extends JPanel {
         g2.setStroke(personStroke);
         
         // drawing the head with outline and fill
-        Ellipse2D.Double head = new Ellipse2D.Double(-0.75, 1.5, 1.5, 1.5);
+        Ellipse2D head = new Ellipse2D.Double(-0.75, 1.5, 1.5, 1.5);
         g2.setPaint(Color.WHITE);
         g2.fill(head);
         g2.setPaint(Color.BLACK);
@@ -324,7 +323,7 @@ public class PicnicScene extends JPanel {
         // drawing the body of the person as a single path
         if (isAnimated) {
             // configuring the path with the bend for the legs and the arms
-            GeneralPath body = new GeneralPath();
+            Path2D body = new Path2D.Double();
             body.moveTo(0, 1.5);
             body.lineTo(0, 0);
 
@@ -367,7 +366,7 @@ public class PicnicScene extends JPanel {
         }
         else {
             // configuring the path with the bend for the legs
-            GeneralPath body = new GeneralPath();
+            Path2D body = new Path2D.Double();
             body.moveTo(0, 1.5);
             body.lineTo(0, 0);
             body.lineTo(0.75 * (facingLeft ? -1 : 1), -0.75);
@@ -429,7 +428,7 @@ public class PicnicScene extends JPanel {
     }
 
     /**
-     * Draws the sun, with five layers that fluctuate slightly.
+     * Draws a tree.
      * Composed of a green circle and a polygonal path shape.
      * 
      * @param g2 The drawing context whose transform will be set.
@@ -480,15 +479,12 @@ public class PicnicScene extends JPanel {
         g2.translate(x, y);
 
         // draw blanket
-        Path2D poly = new Path2D.Double();
-        poly.moveTo(-2, -1);
-        poly.lineTo(0, -1);
-        poly.lineTo(2, 1);
-        poly.lineTo(0, 1);
-        poly.closePath();
-
+        AffineTransform preShear = g2.getTransform(); // save pre-shear transform
+        g2.shear(1.25, 0);
         g2.setPaint(new Color(207, 185, 151));
-        g2.fill(poly);
+        g2.fill(new Rectangle2D.Double(-1.25, -1, 2.25, 2));
+
+        g2.setTransform(preShear); // restore pre-shear transform
 
         // draw basket
         g2.setPaint(new Color(92, 77, 57));
