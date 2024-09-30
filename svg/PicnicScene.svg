@@ -77,4 +77,41 @@
         stroke="#000000"
         stroke-width="15"
         transform="translate(1100, 875) scale(0.35, -0.35) rotate(-45)" />
+
+    <!-- left tree trunk -->
+    <path d="M -50 -200
+             L -50 -150
+             C -50 200 -100 200 -100 200
+             L -25 175
+             L 15 225
+             L 40 175
+             L 100 200
+             C 100 200 50 200 50 -150
+             L 50 -200
+             Z
+            "
+        fill = "#533510"
+        transform="translate(200, 700)" />
+
+    <!-- left tree leaves -->
+    <circle cx="0" cy="-220" r="150" transform="translate(200, 700)" fill="#3A5F11" />
+
+    <!-- right tree trunk -->
+    <path d="M -50 -200
+             L -50 -150
+             C -50 200 -100 200 -100 200
+             L -25 175
+             L 15 225
+             L 40 175
+             L 100 200
+             C 100 200 50 200 50 -150
+             L 50 -200
+             Z
+            "
+        fill = "#533510"
+        transform="translate(1400, 700)" />
+
+    <!-- right tree leaves -->
+    <circle cx="0" cy="-220" r="150" transform="translate(1400, 700)" fill="#3A5F11" />
+
 </svg>
