@@ -343,7 +343,7 @@ public class PicnicScene extends JPanel {
             }
             // otherwise, stretch the leg down the full fixed amount
             else {
-                body.lineTo(0.2 * (facingLeft ? -1 : 1), -extendedLegHeight / 2);
+                body.lineTo(extendedLegX * (facingLeft ? -1 : 1), -extendedLegHeight / 2);
                 body.lineTo(0 * (facingLeft ? -1 : 1), -extendedLegHeight);
             }
 
