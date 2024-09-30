@@ -37,6 +37,9 @@
     var pixelSize; // The size of a pixel in the coordinate system; set up by
                    //    applyWindowToViewportTransform function when it is called.
     var frameNumber = 0; // Which frame we are on... Used in animation.
+
+    // TODO: remove when frame issues are resolved
+    // var startingTime = 0;
       
     /**
      *  The draw() function is called by init() after the page loads,
@@ -645,6 +648,11 @@
      */
     function doFrame() {
         frameNumber++;
+
+        // TODO: remove when frame issues are resolved
+        // var elapsedTime = performance.now() - startingTime;
+        // console.log(frameNumber / (elapsedTime / 1000));
+
         // YOU CAN ADD UPDATE OTHER DATA FOR THE FRAME HERE.
         draw();
         requestAnimationFrame(doFrame);
@@ -680,6 +688,9 @@
         window.requestAnimationFrame = function(callback) {
             setTimeout(callback, 1000/60);    
         }
+
+        // TODO: remove when frame issues are resolved
+        // startingTime = performance.now();
 
         requestAnimationFrame(doFrame);
     }
