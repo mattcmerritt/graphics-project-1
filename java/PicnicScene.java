@@ -29,7 +29,7 @@ public class PicnicScene extends JPanel {
         window.setContentPane(panel); // Show an instance of this class in main window pane
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // End program when window closes.
         window.pack(); // Set window size based on the preferred sizes of its contents.
-        window.setResizable(true); // Let user resize window.
+        window.setResizable(false); // Don't let user resize window.
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
         // Center window on screen.
@@ -208,10 +208,12 @@ public class PicnicScene extends JPanel {
         AffineTransform cs = g2.getTransform(); 
     
         g2.setPaint(new Color(135, 206, 250));
-        g2.fillRect(0, 5, 16, 5); 
+        // g2.fillRect(0, 5, 16, 5); 
+        g2.fillRect(-2, 4, 20, 8);  // slightly larger than necessary to hide black lines at some resolutions
 
         g2.setPaint(new Color(117, 225, 0));
-        g2.fillRect(0, 0, 16, 5); 
+        // g2.fillRect(0, 0, 16, 5); 
+        g2.fillRect(-2, -2, 20, 7);  // slightly larger than necessary to hide black lines at some resolutions
 
         g2.setTransform(cs); 
     }    
