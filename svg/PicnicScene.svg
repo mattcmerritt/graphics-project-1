@@ -47,46 +47,46 @@
         To achive the parallelogram shape, a rectangle is skewed along the x dimension.
      -->
     <rect x="0" y="0" width="225" height="200" 
-        transform="translate(1100, 750) skewX(-45)" 
+        transform="translate(1125, 750) skewX(-45)" 
         fill="#CFB997" />
     <!-- apple on blanket -->
-    <circle cx="-30" cy="70" r="10" 
+    <circle cx="-40" cy="70" r="5" 
         fill="#FF0000"
-        transform="translate(1100, 750)"  />
+        transform="translate(1125, 750)"  />
     <!-- basket on blanket -->
     <rect x="100" y="-25" width="70" height="50" 
         fill="#5C4D39"
-        transform="translate(1100, 750)"  />
+        transform="translate(1125, 750)"  />
     <!-- handle on basket, done as a circle for simplicity -->
     <circle cx="135" cy="-25" r="25" 
         fill="transparent" 
         stroke="#5C4D39" 
         stroke-width="5" 
-        transform="translate(1100, 750)"/>
+        transform="translate(1125, 750)"/>
 
     <!-- person on blanket -->
     <!-- note that this person will be similar to the people on the seesaw -->
 
     <!-- person's body -->
-    <path d="M 0 150 
+    <path d="M 0 -150 
              L 0 0
-             L -75 -75
-             L 0 -150
-             M 0 125
-             L -75 25
+             L -75 75
+             L 0 150
+             M 0 -125
+             L -75 -25
              "
         fill="transparent"
         stroke="#000000"
-        stroke-width="15"
+        stroke-width="10"
         stroke-linejoin="miter"
         stroke-linecap="square"
-        transform="translate(1100, 875) scale(0.35, -0.35) rotate(-45)" />
+        transform="translate(1100, 875) scale(0.35) rotate(45)" />
     <!-- person's head -->
-    <circle cx="0" cy="225" r="75" 
+    <circle cx="0" cy="-225" r="75" 
         fill="#FFFFFF"
         stroke="#000000"
-        stroke-width="15"
-        transform="translate(1100, 875) scale(0.35, -0.35) rotate(-45)" />
+        stroke-width="10"
+        transform="translate(1100, 875) scale(0.35) rotate(45)" />
 
     <!-- left tree trunk -->
     <path d="M -50 -200
@@ -130,14 +130,74 @@
         Since it is not animated, the angle of the seesaw is 
         PI/12 or 15 degrees, which was the largest angle the animated 
         one reached. 
-    -->
+
+        The points in the person's arms and legs are manually computed to account
+        for this angle, using the same logic as the Java version.
+     -->
 
     <!-- seesaw base -->
     <polygon points="100 0 -100 0 0 -150" 
         fill="#3A5F0B" 
-        transform="translate(500, 900)" />
+        transform="translate(443, 950) scale(0.75)" />
     <!-- seesaw bar -->
     <rect x="-300" y="-10" width="600" height="20"
         fill="#C800C8" 
-        transform="translate(500, 900) translate(0, -150) rotate(15)" />
+        transform="translate(443, 950) scale(0.75) translate(0, -150)  rotate(15)" />
+
+    <!-- right seesaw person's body -->
+    <!-- 
+        This person is too close to the ground, so the legs will bend.
+        This affects the coordinates in line 3 and 4 of the path. 
+        The calculations are the following:
+        
+        Line 3 X: -sqrt( (0.8^2+0.2^2)^2 - (-(2.5 * sin(15 degrees) - 1.5)/2)^2 ) 
+        Line 3 Y: (-(2.5 * sin(15 degrees)) - 1.5)/2
+
+        Line 4 X: 0
+        Line 4 Y: -(2.5 * sin(15 degrees)) - 1.5
+     -->
+    <path d="M 0 -150 
+             L 0 0
+             L -53 43
+             L 0 85
+             M 0 -125
+             L -50 -13
+             "
+        fill="transparent"
+        stroke="#000000"
+        stroke-width="10"
+        stroke-linejoin="miter"
+        stroke-linecap="square"
+        transform="translate(443, 950) scale(0.75) translate(0, -150)  rotate(15) translate(250, 0) rotate(-15)" />
+    <!-- right seesaw person's head -->
+    <circle cx="0" cy="-225" r="75" 
+        fill="#FFFFFF"
+        stroke="#000000"
+        stroke-width="10"
+        transform="translate(443, 950) scale(0.75) translate(0, -150)  rotate(15) translate(250, 0) rotate(-15)" />
+
+    <!-- left seesaw person's body -->
+    <!-- 
+        This person is well above the ground, and the legs do not need to bend past the set values
+        for an animated person.
+     -->
+    <path d="M 0 -150 
+             L 0 0
+             L 20 80
+             L 0 160
+             M 0 -125
+             L 50 13
+             "
+        fill="transparent"
+        stroke="#000000"
+        stroke-width="10"
+        stroke-linejoin="miter"
+        stroke-linecap="square"
+        transform="translate(443, 950) scale(0.75) translate(0, -150)  rotate(15) translate(-250, 0) rotate(-15)" />
+    <!-- left seesaw person's head -->
+    <circle cx="0" cy="-225" r="75" 
+        fill="#FFFFFF"
+        stroke="#000000"
+        stroke-width="10"
+        transform="translate(443, 950) scale(0.75) translate(0, -150)  rotate(15) translate(-250, 0) rotate(-15)" />
 </svg>
