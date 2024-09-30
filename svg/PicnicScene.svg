@@ -54,9 +54,14 @@
     <!-- blanket -->
     <!-- 
         To achive the parallelogram shape, a rectangle is skewed along the x dimension.
+        The skewX matrix is very similar to the shear transformation matrix, but the value of a
+        is replaced by tan(theta), with theta being the skew angle.
+
+        Thus, to compute our shear(1.25, 0) using skewX, we simply need theta = tan-1(1.25), or
+        roughly 51 degrees. The skew is done as a negative angle to account for the reversed y-coordinates.
      -->
     <rect x="0" y="0" width="225" height="200" 
-        transform="translate(1125, 750) skewX(-45)" 
+        transform="translate(1125, 750) skewX(-51)" 
         fill="#CFB997" />
     <!-- apple on blanket -->
     <circle cx="-40" cy="70" r="5" 
