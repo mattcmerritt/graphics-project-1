@@ -90,7 +90,7 @@
       drawBlanket(11.5, 2);
       drawTree(14, 3);
       drawTree(2, 3);
-      drawSeesaw(5, 1);
+      drawSeesaw(4.425, 0.5);
 
       graphics.restore();
   }
@@ -196,6 +196,7 @@
     
     // move the transform to the location of the triangle
     graphics.translate(x, y);
+    graphics.scale(0.75, 0.75);
 
     // begin by creating the triangular base
     var baseHeight = 1.5;

@@ -129,7 +129,7 @@ public class PicnicScene extends JPanel {
         drawBlanket(g2, 11.5, 2);
         drawTree(g2, 14, 3);
         drawTree(g2, 2, 3);
-        drawSeesaw(g2, 5, 1);
+        drawSeesaw(g2, 4.425, 0.5);
 
         g2.setTransform(cs); // Restore previous coordinate system
     }
@@ -229,6 +229,7 @@ public class PicnicScene extends JPanel {
 
         // move the transform to the location of the triangle
         g2.translate(x, y);
+        g2.scale(0.75, 0.75);
 
         // begin by creating the triangular base
         double baseHeight = 1.5;
