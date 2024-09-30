@@ -1,4 +1,13 @@
 <svg version="1.1" width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">  
+
+    <!--
+        PicnicScene
+        Author: Matthew Merritt, Michael Merritt, Harsh Gandhi
+        Fall 24: CSC345/CSC645
+
+        SVG implementation of the picnic scene.
+    -->
+
     <!-- background -->
     <!-- sky -->
     <rect x="0" y="0" width="1600" height="500" fill="#87CEFA" />
@@ -65,8 +74,7 @@
         transform="translate(1125, 750)"/>
 
     <!-- person on blanket -->
-    <!-- note that this person will be similar to the people on the seesaw -->
-
+    <!-- Note that this person will be similar to the people on the seesaw -->
     <!-- person's body -->
     <path d="M 0 -150 
              L 0 0
