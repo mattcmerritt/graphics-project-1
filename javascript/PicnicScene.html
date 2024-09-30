@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html><!--
+    PicnicScene
+    Author: Matthew Merritt, Michael Merritt, Harsh Gandhi
+    Fall 24: CSC345/CSC645
+
+   This page is based off of the Canvas Hierarchy Scene Example.html from class, which
+   is a modification of the HierarchySceneDeux from the Java Graphics2D example,
+   combined with the GraphicsPlusStarter.html from the textbook.   
+
+   JavaScript implementation of the picnic scene, with animations.
+--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Picnic Scene - JavaScript</title>
+<style>
+    /* This style section is here to make the canvas more obvious on the
+       page.  It is white on a light gray page background, with a thin
+       black border. */
+    body {
+        background-color: #DDDDDD;
+    }
+    canvas {
+        background-color: black;
+        display: block;
+    }
+    #canvasholder {
+        border:2px solid black;
+        float: left; /* This makes the border exactly fit the canvas. */
+    }
+</style>
+<script>
+
+    "use strict";  // gives improved error-checking in scripts.
+
+    var canvas;    // The canvas element on which we will draw.
+    var graphics;  // A 2D graphics context for drawing on the canvas.
+    var pixelSize; // The size of a pixel in the coordinate system; set up by
+                   //    applyWindowToViewportTransform function when it is called.
+    var frameNumber = 0; // Which frame we are on... Used in animation.
+      
+    /**
+     *  The draw() function is called by init() after the page loads,
+     *  to draw the content of the canvas.  At the start, clear the canvas
+     *  and save a copy of the state; restore the state at the end.  (These
+     *  actions are not necessary in this program, since the function will
+     *  only be called once.)
+     */
+    function draw() {
+        graphics.clearRect(0,0,1600,1000);  // Clear the canvas, so it shows its background color.
+        graphics.save();  // Push graphics context state onto a stack.
+        
+        /* Here, I set up a new coordinate system on the drawing area, by calling
+         * the applyLimits() method that is defined below.  Without this call, I
+         * would be using regular pixel coordinates.  This funciton is defined below.
+         * It sets the value of the global variable pixelSize, which I need for
+         * line widths in the transformed coordinate system.
+         */
+        
+        applyWindowToViewportTransformation(0, 16, 0, 10, true);
+        
+        drawScene();
+        
+        graphics.restore();  // Pop the saved graphics context state.   DO NOT FORGET THIS STEP!!!
+    } // end of draw()
+    
+  /**
+   * Draw the scene
+  */
+  function drawScene() {
+      graphics.save();  // Save the CS so it can be restored later.
+      drawCoordinateFrame(16);
+
+      graphics.scale(1,1);
+      drawMainScene();
+      
+      graphics.restore();
+  }
+
+  /**
+   * Draws the entire picnic scene using the other functions defined below.
+   */
+  function drawMainScene() {
+      graphics.save();
+
+      // calls to additional functions to draw shapes and components
+      drawBackground();
+      drawLake();
+      drawSun(11, 10, 0.25);
+      drawBird();
+      drawBlanket(11.5, 2);
+      drawTree(14, 3);
+      drawTree(2, 3);
+      drawSeesaw(5, 1);
+
+      graphics.restore();
+  }
+
+  /**
+   * Draws the bird using two different arcs.
+   * It is animated by adjusting the location of the control points.
+   */
+  function drawBird() {
+    graphics.save(); // Save current "coordinate system" transform
+
+    // Saving the current stroke to restore later
+    var initialStrokeColor = graphics.strokeStyle;
+    var initialStrokeWidth = graphics.lineWidth;
+    var initialStrokeCap = graphics.lineCap;
+    var initialStrokeJoin = graphics.lineJoin;
+
+    // bird will cross the screen every 3 seconds, 180 frames are needed to cross
+    // horizontally, the bird should cover 20 units with 2 units off screen on both sides,
+    // and should start in the center
+    var framesPerLoop = 100 * 60;
+    var birdX = ((frameNumber + framesPerLoop / 2) % framesPerLoop) / framesPerLoop * 20.0 - 2;
+
+    // bird will fly in a wave pattern through the sky vertically
+    // the factor out front adjusts how high and low the bird goes,
+    // and the factor inside adjusts how fast it swings up and down
+    var birdY = 0.5 * Math.sin(frameNumber * 0.01) + 7.5;
+
+    // adjust coordinate system to center bird
+    graphics.translate(birdX, birdY);
+
+    // bounds for the bird wing length and height
+    var birdWingHeight = 0.1;
+    var birdWingLength = 0.2;
+
+    // adjusting arc size and color
+    graphics.strokeStyle = "#000000";
+    graphics.lineWidth = 3 * pixelSize;
+    graphics.lineCap = "round";
+    graphics.lineJoin = "round";
+
+    // drawing the bird with arcs
+    graphics.beginPath();
+    graphics.moveTo(0, 0);
+    graphics.bezierCurveTo(birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+    graphics.moveTo(0, 0);
+    graphics.bezierCurveTo(-birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+    graphics.stroke();
+
+    // Restore previous stroke
+    graphics.strokeStyle = initialStrokeColor;
+    graphics.lineWidth = initialStrokeWidth;
+    graphics.lineCap = initialStrokeCap;
+    graphics.lineJoin = initialStrokeJoin;
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws the lake using a filled blue arc.
+   */
+  function drawLake() {
+    graphics.save(); // Save current "coordinate system" transform
+    
+    graphics.translate(8, 5);
+    graphics.scale(1, 0.35);
+    graphics.fillStyle = "#0015FF";
+    graphics.beginPath();
+    graphics.moveTo(0, 0);
+    graphics.arc(0, 0, 6, 0, Math.PI, true);
+    graphics.fill();
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws the light blue sky and the bright green grass using rectangles.
+   */
+  function drawBackground() {
+    graphics.save(); // Save current "coordinate system" transform
+      
+    graphics.fillStyle = "#87CEFA";
+    graphics.fillRect(0, 5, 16, 5);
+
+    graphics.fillStyle = "#75E100";
+    graphics.fillRect(0, 0, 16, 5);
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws the seesaw, with the two animated people on it.
+   * Composed of a green triangular base with a pink rectangle, and two people
+   * facing each other.
+   * 
+   * @param x  The x-location for the midpoint of the bottom side of the
+   *           triangular base.
+   * @param y  The y-location for the midpoint of the bottom side of the
+   *           triangular base.
+   */
+  function drawSeesaw(x, y) {
+    graphics.save(); // Save current "coordinate system" transform
+    
+    // move the transform to the location of the triangle
+    graphics.translate(x, y);
+
+    // begin by creating the triangular base
+    var baseHeight = 1.5;
+    var baseWidth = 2;
+    graphics.fillStyle = "#3A5F11";
+    graphics.beginPath();
+    graphics.moveTo(-baseWidth / 2, 0);
+    graphics.lineTo(0, baseHeight);
+    graphics.lineTo(baseWidth / 2, 0);
+    graphics.closePath();
+    graphics.fill();
+
+    // move to the center of the seesaw bar (the point it rotates on)
+    graphics.translate(0, baseHeight);
+    // rotate the transform based on the current number of frames
+    // the number inside the sine function can be adjusted to control speed, 
+    // and the angle controls the amplitude of the rotation
+    var seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+    graphics.rotate(seesawRotation);
+
+    // add the animated bar to the seesaw
+    graphics.fillStyle = "#C800C8";
+    graphics.fillRect(-3, -0.1, 6, 0.2);
+
+    // add animated people
+    const distanceFromCenter = 2.5;
+
+    graphics.translate(distanceFromCenter, 0); // move along seesaw beam to the person's location
+    graphics.rotate(-seesawRotation); // undo rotation
+
+    // calculate how far up or down the seesaw has moved 
+    // (used to find the ground relative to the person)
+    var seesawDisplacementY = distanceFromCenter * Math.sin(seesawRotation);
+
+    // for the person on the right, the ground is the opposite of the displacement, minus the base height as well
+    drawPerson(0, 0, true, (-seesawDisplacementY - baseHeight), true, 0, 1);
+    
+    graphics.rotate(seesawRotation); // reapply rotation to move along beam
+    graphics.translate(-2 * distanceFromCenter, 0); // move along seesaw beam to the second person's location
+    graphics.rotate(-seesawRotation); // undo rotation again
+    
+    // for the person on the left, the ground is the displacement, minus the base height as well
+    drawPerson(0, 0, true, (seesawDisplacementY - baseHeight), false, 0, 1);
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws a person, either animated or stationary.
+   * Composed of lines on a path and circles. 
+   * The people are drawn with the pivot point located at the bottom of the body.
+   * The animation covers the legs bending as they reach the ground, as well as the person
+   * keeping their hands on the seesaw at all times.
+   * 
+   * @param x             The x-location for the midpoint of the bottom side of the
+   *                      triangular base.
+   * @param y             The y-location for the midpoint of the bottom side of the
+   *                      triangular base.
+   * @param isAnimated    Determines if the hands and legs of the person need to move.
+   *                      (Used by both people on the seesaw.)
+   * @param groundY       The vertical height that the leg stops moving down at, setting
+   *                      when the leg starts bending. (Used by both people on the seesaw.)
+   * @param facingLeft    Detemines which direction to draw the person. If animated, 
+   *                      this will also determine when they move up or down.
+   *                      (Used by the man on the right of the seesaw and the blanket.)
+   * @param rotationAngle The amount that the coordinate system should be rotated before
+   *                      drawing. (Used for the man on the blanket resting at an angle.)
+   * @param scaleFactor   The value used to scale the entire person. Preserves aspect ratio.
+   *                      (Used for the man on the blanket.)
+   */
+  function drawPerson(x, y, isAnimated, groundY, facingLeft, rotationAngle, scaleFactor) {
+    graphics.save(); // Save current "coordinate system" transform
+      
+    // Saving the current stroke to restore later
+    var initialStrokeColor = graphics.strokeStyle;
+    var initialStrokeWidth = graphics.lineWidth;
+    var initialStrokeCap = graphics.lineCap;
+    var initialStrokeJoin = graphics.lineJoin;
+
+    // position the coordinate system to account for the starting position
+    graphics.translate(x, y);
+    graphics.rotate(rotationAngle);
+    graphics.scale(scaleFactor, scaleFactor);
+
+    // setting up the stroke for drawing the body
+    graphics.strokeStyle = "#000000";
+    graphics.lineWidth = 0.1;
+    graphics.lineCap = "square";
+    graphics.lineJoin = "miter";
+
+    // drawing the head with outline and fill
+    graphics.fillStyle = "#FFFFFF";
+    graphics.fillCircle(0, 2.25, 0.75);
+    graphics.strokeStyle = "#000000";
+    graphics.strokeCircle(0, 2.25, 0.75);
+
+    // drawing the body of the person as a single path
+    if (isAnimated) {
+      // configuring the path with the bend for the legs and the arms
+      graphics.beginPath();
+      graphics.moveTo(0, 1.5);
+      graphics.lineTo(0, 0);
+
+      // only allow the legs to go a set distance down, but maintain the same length
+      var extendedLegHeight = 1.6;
+      var extendedLegX = 0.2;
+      var legSegmentLength = Math.sqrt((extendedLegX * extendedLegX) + (extendedLegHeight / 2 * extendedLegHeight / 2));
+
+      // if the height to the ground is less than the max leg height, use the full height to draw the legs
+      // the bend location will depend on how low to the ground the person is, and it must preserve the length
+      // of the leg segments
+      if (Math.abs(groundY) < extendedLegHeight) {
+        var bendX = Math.sqrt((legSegmentLength * legSegmentLength) - (groundY / 2 * groundY / 2));
+        graphics.lineTo(bendX * (facingLeft ? -1 : 1), groundY / 2);
+        graphics.lineTo(0, groundY);
+      }
+      // otherwise, stretch the leg down the full fixed amount
+      else {
+        graphics.lineTo(0.2 * (facingLeft ? -1 : 1), -extendedLegHeight / 2);
+        graphics.lineTo(0 * (facingLeft ? -1 : 1), -extendedLegHeight);
+      }
+
+      // need to calculate the y-coordinate for the person's hand based on the rotation
+      var seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+      var relativeHandX = 0.5 * (facingLeft ? -1 : 1);
+      var relativeHandY = 0;
+      var handY = Math.sin(seesawRotation) * relativeHandX + Math.cos(seesawRotation) * relativeHandY;
+
+      // add the arms and hands to the path
+      graphics.moveTo(0, 1.25);
+      // hand connecting to the seesaw
+      graphics.lineTo(0.5 * (facingLeft ? -1 : 1), handY);
+
+      graphics.strokeStyle = "#000000";
+      graphics.stroke();
+    }
+    else {
+      // configuring the path with the bend for the legs
+      graphics.beginPath();
+      graphics.moveTo(0, 1.5);
+      graphics.lineTo(0, 0);
+      graphics.lineTo(0.75 * (facingLeft ? -1 : 1), -0.75);
+      graphics.lineTo(0, -1.5);
+
+      // adding arms
+      graphics.moveTo(0, 1.25);
+      graphics.lineTo(0.75 * (facingLeft ? -1 : 1), 0.25);
+
+      graphics.strokeStyle = "#000000";
+      graphics.stroke();
+    }
+
+    // Restore previous stroke
+    graphics.strokeStyle = initialStrokeColor;
+    graphics.lineWidth = initialStrokeWidth;
+    graphics.lineCap = initialStrokeCap;
+    graphics.lineJoin = initialStrokeJoin;
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws the sun, with five layers that fluctuate slightly.
+   * Composed of five yellow circles of decreasing alpha values.
+   * 
+   * @param x             The x-location for the midpoint of the sun.
+   * @param y             The y-location for the midpoint of the sun.
+   * @param sizeRange     The largest possible random value for the size.
+   *                      Range of size values will be 
+   *                      (base value - sizeRange, base value + sizeRange).
+   */
+  function drawSun(x, y, sizeRange) {
+    graphics.save(); // Save current "coordinate system" transform
+      
+    // move the transform to the location of the object
+    graphics.translate(x, y);
+
+    // outermost circle
+    var alphaFluctuation = (Math.sin(frameNumber * 0.1) * 15); // can't be greater than 15
+    var sizeFluctuation = Math.sin(frameNumber * 0.01) * sizeRange;
+
+    graphics.fillStyle = "#FFFF00";
+
+    graphics.globalAlpha = (50 + alphaFluctuation) / 255;
+    graphics.fillCircle(0, 0, 1.5 + (sizeFluctuation / 2));
+
+    // second largest circle
+    graphics.globalAlpha = (80 + alphaFluctuation) / 255;
+    graphics.fillCircle(0, 0, 1.25 + (sizeFluctuation / 2));
+
+    // middle circle
+    graphics.globalAlpha = (120 + alphaFluctuation) / 255;
+    graphics.fillCircle(0, 0, 1 + (sizeFluctuation / 2));
+
+    // fourth largest circle
+    graphics.globalAlpha = (150 + alphaFluctuation) / 255;
+    graphics.fillCircle(0, 0, 0.75 + (sizeFluctuation / 2));
+
+    // innermost circle
+    graphics.globalAlpha = (240 + alphaFluctuation) / 255;
+    graphics.fillCircle(0, 0, 0.5 + (sizeFluctuation / 2));
+
+    graphics.globalAlpha = 1; // Restore alpha value
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws a tree.
+   * Composed of a green circle and a polygonal path shape.
+   * 
+   * @param x  The x-location for the midpoint of the sun.
+   * @param y  The y-location for the midpoint of the sun.
+   */
+  function drawTree(x, y) {
+    graphics.save(); // Save current "coordinate system" transform
+      
+    // move the transform to the location of the object
+    graphics.translate(x, y);
+
+    // draw trunk
+    graphics.beginPath();
+    graphics.moveTo(-0.5, 2); // top left
+    graphics.lineTo(-0.5, 1.5);
+    graphics.bezierCurveTo(-0.5, -2, -1, -2, -1, -2);
+    graphics.lineTo(-0.25, -1.75);
+    graphics.lineTo(0.15, -2.25);
+    graphics.lineTo(0.4, -1.75);
+    graphics.lineTo(1, -2);
+    graphics.bezierCurveTo(1, -2, 0.5, -2, 0.5, 1.5);
+    graphics.lineTo(0.5, 2); // top right
+    graphics.closePath();
+
+    graphics.fillStyle = "#533510";
+    graphics.fill();
+
+    // draw leaves
+    graphics.fillStyle = "#3A5F11";
+    graphics.fillCircle(0, 2.2, 1.5);
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draws the blanket, with a person and an apple on it.
+   * Composed of a tan polygon, red circle, and person.
+   * 
+   * @param x  The x-location for the midpoint of the sun.
+   * @param y  The y-location for the midpoint of the sun.
+   */
+  function drawBlanket(x, y) {
+    graphics.save(); // Save current "coordinate system" transform
+    
+    // Saving the current stroke to restore later
+    var initialStrokeColor = graphics.strokeStyle;
+    var initialStrokeWidth = graphics.lineWidth;
+    var initialStrokeCap = graphics.lineCap;
+    var initialStrokeJoin = graphics.lineJoin;
+
+    // move the transform to the location of the object
+    graphics.translate(x, y);
+
+    // draw blanket
+    graphics.save(); // save pre-shear transform
+    graphics.transform(1, 0, 1.25, 1, 0, 0); // shear(1.25, 0)
+    graphics.fillStyle = "#CFB997";
+    graphics.fillRect(-1.25, -1, 2.25, 2);
+    graphics.restore(); // restore pre-shear transform
+
+    // adjusting arc size and color for basket handle
+    graphics.strokeStyle = "#5C4D39";
+    graphics.lineWidth = 3 * pixelSize;
+    graphics.lineCap = "round";
+    graphics.lineJoin = "round";
+
+    // draw arc for handle
+    graphics.beginPath();
+    graphics.moveTo(1.5, 1);
+    graphics.arc(1.25, 1.25, 0.25, 0, Math.PI, false);
+    graphics.stroke();
+    
+    // reset stroke
+    graphics.strokeStyle = initialStrokeColor;
+    graphics.lineWidth = initialStrokeWidth;
+    graphics.lineCap = initialStrokeCap;
+    graphics.lineJoin = initialStrokeJoin;
+
+    // draw basket rectangle
+    graphics.fillStyle = "#5C4D39";
+    graphics.fillRect(0.9, 0.75, 0.7, 0.5);
+    
+    // draw apple
+    graphics.fillStyle = "#FF0000";
+    graphics.fillCircle(-0.3, 0.5, 0.1);
+
+    // draw person
+    drawPerson(0, 0, false, 0, true, -Math.PI / 4, 0.35);
+
+    graphics.restore(); // Restore previous coordinate system
+  }
+
+  /**
+   * Draw a coordinate frame
+   */
+  function drawCoordinateFrame(length) {
+      graphics.save();
+      graphics.strokeStyle = "white";
+      graphics.lineWidth = 2*pixelSize; // This will be 2 pixels wide, taking into account the coordinate transform.
+
+      // Draw the y-axis and its tick marks
+      graphics.strokeLine(0, 0, 0, length);   // This only works because we ADDED this function to graphics
+      for (var i = 1; i <= length; i++)
+          graphics.strokeLine(-0.2, i, 0.2, i);
+
+      // Draw x-axis and its tick marks
+      graphics.strokeLine(0, 0, length, 0);
+      for (var i = 1; i <= length; i++)
+          graphics.strokeLine(i, -0.2, i, 0.2);
+      graphics.restore();
+  }
+
+    /**
+     * Sets up a transformation in the graphics context so that the canvas will
+     * show x-values in the range from left to right, and y-values in the range
+     * from bottom to top.  If preserveAspect is true, then one of the ranges
+     * will be increased, if necessary, to account for the aspect ratio of the
+     * canvas.  This function sets the global variable pixelsize to be the
+     * size of a pixel in the new coordinate system.  (If preseverAspect is
+     * true, pixelSize is the maximum of its horizontal and vertical sizes.)
+     */
+    function applyWindowToViewportTransformation(left,right,bottom,top,preserveAspect) {
+        var displayAspect, windowAspect;
+        var excess;
+        var pixelwidth, pixelheight;
+        if (preserveAspect) {
+            // Adjust the limits to match the aspect ratio of the drawing area.
+            displayAspect = Math.abs(canvas.height / canvas.width);
+            windowAspect = Math.abs(( top-bottom ) / ( right-left ));
+            if (displayAspect > windowAspect) {
+                // Expand the viewport vertically.
+                excess = (top-bottom) * (displayAspect/windowAspect - 1)
+                top = top + excess/2
+                bottom = bottom - excess/2
+            }
+            else if (displayAspect < windowAspect) {
+                // Expand the viewport vertically.
+                excess = (right-left) * (windowAspect/displayAspect - 1)
+                right = right + excess/2
+                left = left - excess/2	
+            }
+        }
+        graphics.scale( canvas.width / (right-left), canvas.height / (bottom-top) )
+        graphics.translate( -left, -top );
+        pixelwidth =  Math.abs(( right - left ) / canvas.width);
+        pixelheight = Math.abs(( bottom - top ) / canvas.height);
+        pixelSize = Math.max(pixelwidth,pixelheight);
+    }  // end of applyWindowToViewportTransformation()
+
+
+    /**
+     * This function can be called to add a collection of extra drawing function to
+     * a graphics context, to make it easier to draw basic shapes with that context.
+     * The parameter, graphics, must be a canvas 2d graphics context.
+     *
+     * The following new functions are added to the graphics context:
+     *
+     *    graphics.strokeLine(x1,y1,x2,y2) -- stroke the line from (x1,y1) to (x2,y2).
+     *    graphics.fillCircle(x,y,r) -- fill the circle with center (x,y) and radius r.
+     *    graphics.strokeCircle(x,y,r) -- stroke the circle.
+     *    graphics.fillOval(x,y,r1,r2) -- fill oval with center (x,y) and radii r1 and r2.
+     *    graphics.stokeOval(x,y,r1,r2) -- stroke the oval
+     *    graphics.fillPoly(x1,y1,x2,y2,...) -- fill polygon with vertices (x1,y1), (x2,y2), ...
+     *    graphics.strokePoly(x1,y1,x2,y2,...) -- stroke the polygon.
+     *    graphics.getRGB(x,y) -- returns the color components of pixel at (x,y) as an array of
+     *         four integers in the range 0 to 255, in the order red, green, blue, alpha.
+     *
+     * (Note that "this" in a function that is called as a member of an object refers to that
+     * object.  Here, this will refer to the graphics context.)
+     */
+    function addGraphicsContextExtras(graphics) {
+        graphics.strokeLine = function(x1,y1,x2,y2) {
+           this.beginPath();
+           this.moveTo(x1,y1);
+           this.lineTo(x2,y2);
+           this.stroke();
+        }
+        graphics.fillCircle = function(x,y,r) {
+           this.beginPath();
+           this.arc(x,y,r,0,2*Math.PI,false);
+           this.fill();
+        }
+        graphics.strokeCircle = function(x,y,radius) {
+           this.beginPath();
+           this.arc(x,y,radius,0,2*Math.PI,false);
+           this.stroke();
+        }
+        graphics.fillPoly = function() { 
+            if (arguments.length < 6)
+               return;
+            this.beginPath();
+            this.moveTo(arguments[0],arguments[1]);
+            for (var i = 2; i+1 < arguments.length; i = i + 2) { 
+               this.lineTo(arguments[i],arguments[i+1]);
+            }
+            this.closePath();
+            this.fill();
+        }
+        graphics.strokePoly = function() { 
+            if (arguments.length < 4)
+               return;
+            this.beginPath();
+            this.moveTo(arguments[0],arguments[1]);
+            for (var i = 2; i+1 < arguments.length; i = i + 2) { 
+               this.lineTo(arguments[i],arguments[i+1]);
+            }
+            this.closePath();
+            this.stroke();
+        }
+        graphics.fillOval = function(x,y,horizontalRadius,verticalRadius) {
+           this.save();
+           this.translate(x,y);
+           this.scale(horizontalRadius,verticalRadius);
+           this.beginPath();
+           this.arc(0,0,1,0,2*Math.PI,false);
+           this.restore();
+           this.fill();
+        }
+        graphics.strokeOval = function(x,y,horizontalRadius,verticalRadius) {
+           this.save();
+           this.translate(x,y);
+           this.scale(horizontalRadius,verticalRadius);
+           this.beginPath();
+           this.arc(0,0,1,0,2*Math.PI,false);
+           this.restore();
+           this.stroke();
+        }
+        graphics.getRGB = function(x,y) {
+            var color = this.getImageData(x,y,1,1);
+            return color.data;
+        }
+    }    // end of addGraphicsContextExtras()
+
+     /**
+     *  Draw one frame of the animation, and call requestAnimationFrame() to arrange
+     *  for the function to be called again.
+     */
+    function doFrame() {
+        frameNumber++;
+        // YOU CAN ADD UPDATE OTHER DATA FOR THE FRAME HERE.
+        draw();
+        requestAnimationFrame(doFrame);
+    }
+  
+    /**
+     * The init() funciton is called after the page has been
+     * loaded.  It initializes the canvas and graphics variables.
+     * It calles addGraphicsContextExtras(graphics) to add the extra
+     * drawing functions to the graphics context, and it calls draw()
+     * to draw on the canvas.
+     */
+    function init() {
+        try {
+            canvas = document.getElementById("canvas");
+            graphics = canvas.getContext("2d");
+        } catch(e) {
+            document.getElementById("canvasholder").innerHTML =
+               "Canvas graphics is not supported.<br>" +
+               "An error occurred while initializing graphics.";
+        }
+        addGraphicsContextExtras(graphics);  // Add the extra features to the graphics context
+        draw();  // Call draw() to draw on the canvas.
+        if (!window.requestAnimationFrame) { // This is for Internet Explorer 9
+            window.requestAnimationFrame = function(callback) {
+                setTimeout(callback, 1000/60);    
+            }
+        }
+        requestAnimationFrame(doFrame);
+    }
+</script>
+</head>
+<body onload="init()"> <!-- the onload attribute here is what calls the init() function -->
+
+<!-- <h2>Picnic Scene</h2> -->
+
+<noscript>
+    <!-- This message will be shown in the page if JavaScript is not available. -->
+<p>JavaScript is required to use this page.</p>
+</noscript>
+
+<div id="canvasholder">
+<canvas id="canvas" width="1600" height="1000">
+    <!-- This message is shown on the page if the browser doesn't support the canvas element. -->
+Canvas not supported.
+</canvas>
+</div>
+
+
+
+</body></html>
