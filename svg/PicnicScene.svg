@@ -1,0 +1,56 @@
+<svg version="1.1" width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">  
+    <!-- background -->
+    <!-- sky -->
+    <rect x="0" y="0" width="1600" height="500" fill="#87CEFA" />
+    <!-- grass -->
+    <rect x="0" y="500" width="1600" height="500" fill="#75E100" />
+
+    <!-- lake -->
+    <!-- 
+        To draw the lake, a path is used that begins at the center of the lake ellipse,
+        then moves to the left edge of the ellipse of the lake,
+        then draws the bottom arc with radii (600, 250) to the right edge,
+        then closes the path.
+     -->
+    <path d="M 800 500
+             h -600 
+             a 600 250 0 0 0 1200 0
+             Z" 
+        fill="#000EFF" />
+
+    <!-- sun -->
+    <circle cx="1100" cy="0" r="150" fill="#FFFF00" fill-opacity="0.2" />
+    <circle cx="1100" cy="0" r="125" fill="#FFFF00" fill-opacity="0.4" />
+    <circle cx="1100" cy="0" r="100" fill="#FFFF00" fill-opacity="0.6" />
+    <circle cx="1100" cy="0" r="75" fill="#FFFF00" fill-opacity="0.8" />
+    <circle cx="1100" cy="0" r="50" fill="#FFFF00" fill-opacity="1" />
+
+    <!-- bird -->
+    <!-- 
+        To draw the bird, a path is used with two bezier curves and rounded caps and joins.
+        To normalize the coordinates, a translation is used to center the coordinate system
+        on the middle of the bird.
+     -->
+    <path d="M 0 0
+             c 5 -10 15 -10 20 -5
+             M 0 0
+             c -5 -10 -15 -10 -20 -5"
+        fill="transparent"
+        stroke="#000000"
+        stroke-width="3"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        transform="translate(800, 250)" />
+
+    <!-- blanket -->
+    <!-- 
+        To achive the parallelogram shape, a rectangle is skewed along the x dimension.
+     -->
+    <rect x="0" y="0" width="225" height="200" transform="translate(1100, 750) skewX(-45)" fill="#CFB997" />
+    <!-- apple on blanket -->
+    <circle cx="-30" cy="70" r="10" transform="translate(1100, 750)" fill="#FF0000" />
+    <!-- basket on blanket -->
+    <rect x="100" y="-25" width="70" height="50" transform="translate(1100, 750)" fill="#5C4D39" />
+    <!-- handle on basket, done as a circle for simplicity -->
+    <circle cx="135" cy="-25" r="25" transform="translate(1100, 750)" stroke="#5C4D39" stroke-width="5" fill="transparent" />
+</svg>
