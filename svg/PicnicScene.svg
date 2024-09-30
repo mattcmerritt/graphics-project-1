@@ -46,13 +46,23 @@
     <!-- 
         To achive the parallelogram shape, a rectangle is skewed along the x dimension.
      -->
-    <rect x="0" y="0" width="225" height="200" transform="translate(1100, 750) skewX(-45)" fill="#CFB997" />
+    <rect x="0" y="0" width="225" height="200" 
+        transform="translate(1100, 750) skewX(-45)" 
+        fill="#CFB997" />
     <!-- apple on blanket -->
-    <circle cx="-30" cy="70" r="10" transform="translate(1100, 750)" fill="#FF0000" />
+    <circle cx="-30" cy="70" r="10" 
+        fill="#FF0000"
+        transform="translate(1100, 750)"  />
     <!-- basket on blanket -->
-    <rect x="100" y="-25" width="70" height="50" transform="translate(1100, 750)" fill="#5C4D39" />
+    <rect x="100" y="-25" width="70" height="50" 
+        fill="#5C4D39"
+        transform="translate(1100, 750)"  />
     <!-- handle on basket, done as a circle for simplicity -->
-    <circle cx="135" cy="-25" r="25" transform="translate(1100, 750)" stroke="#5C4D39" stroke-width="5" fill="transparent" />
+    <circle cx="135" cy="-25" r="25" 
+        fill="transparent" 
+        stroke="#5C4D39" 
+        stroke-width="5" 
+        transform="translate(1100, 750)"/>
 
     <!-- person on blanket -->
     <!-- note that this person will be similar to the people on the seesaw -->
@@ -73,7 +83,7 @@
         transform="translate(1100, 875) scale(0.35, -0.35) rotate(-45)" />
     <!-- person's head -->
     <circle cx="0" cy="225" r="75" 
-        fill="white"
+        fill="#FFFFFF"
         stroke="#000000"
         stroke-width="15"
         transform="translate(1100, 875) scale(0.35, -0.35) rotate(-45)" />
@@ -114,4 +124,20 @@
     <!-- right tree leaves -->
     <circle cx="0" cy="-220" r="150" transform="translate(1400, 700)" fill="#3A5F11" />
 
+
+    <!-- seesaw -->
+    <!-- 
+        Since it is not animated, the angle of the seesaw is 
+        PI/12 or 15 degrees, which was the largest angle the animated 
+        one reached. 
+    -->
+
+    <!-- seesaw base -->
+    <polygon points="100 0 -100 0 0 -150" 
+        fill="#3A5F0B" 
+        transform="translate(500, 900)" />
+    <!-- seesaw bar -->
+    <rect x="-300" y="-10" width="600" height="20"
+        fill="#C800C8" 
+        transform="translate(500, 900) translate(0, -150) rotate(15)" />
 </svg>
