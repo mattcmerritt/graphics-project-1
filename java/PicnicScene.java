@@ -14,8 +14,26 @@ import java.awt.*; // import statements to make necessary classes available
 import java.awt.event.*;
 import java.awt.geom.*;
 import javax.swing.*;
+import java.util.ArrayList;
 
 public class PicnicScene extends JPanel {
+    /**
+     * Bird inner class for use in flock behaviors. Stores various data for drawBird to use.
+     */
+    private class Bird {
+        public double xOffset;
+        public double yOffset;
+        public double animationOffset;
+        public long spawnTimeMillis;
+
+        public Bird(double xOffset, double yOffset, double animationOffset, long spawnTimeMillis) {
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            this.animationOffset = animationOffset;
+            this.spawnTimeMillis = spawnTimeMillis;
+        }
+    }
+    
     /**
      * This main() routine makes it possible to run the class PicnicScene
      * as an application. It simply creates a window that contains a panel
@@ -66,6 +84,8 @@ public class PicnicScene extends JPanel {
 
     private long elapsedTimeMillis; // The time, in milliseconds, since the animation started.
 
+    private ArrayList<Bird> activeBirds; // List of birds currently being drawn.
+
     /**
      * This constructor sets up a PicnicScene when it is created. Here, it
      * sets the size of the drawing area. (The size is set as a "preferred size,"
@@ -73,6 +93,8 @@ public class PicnicScene extends JPanel {
      */
     public PicnicScene() {
         setPreferredSize(new Dimension(1600, 1000)); // Set size of drawing area, in pixels.
+        activeBirds = new ArrayList<Bird>(); // initialize bird list
+        activeBirds.add(new Bird(0, 0, 0, 0)); // add default bird that appears in the middle of the screen
     }
 
     /**
@@ -132,7 +154,57 @@ public class PicnicScene extends JPanel {
         drawBackground(g2);
         drawLake(g2); 
         drawSun(g2, 11, 10, 0.25);
-        drawBird(g2);
+
+        // flock behavior
+        // draw birds
+        ArrayList<Boolean> areBirdsOffScreen = new ArrayList<Boolean>(); // create parallel array to hold if each bird should be destroyed
+        for(Bird birdInfo : activeBirds) {
+            areBirdsOffScreen.add(drawBird(g2, birdInfo.xOffset, birdInfo.yOffset, birdInfo.animationOffset, birdInfo.spawnTimeMillis)); // draws bird and populates areBirdsOffScreen
+        }
+        // delete birds that are far off-screen
+        int i = 0;
+        while(i < activeBirds.size()) {
+            // delete bird if marked as true
+            if(areBirdsOffScreen.get(i)) {
+                activeBirds.remove(i);
+                areBirdsOffScreen.remove(i);
+            }
+            // else move to next bird
+            else {
+                i++;
+            }
+        }
+        // repopulate birds if none remain
+        if(activeBirds.isEmpty()) {
+            int flockFormation = (int) (Math.random() * 5); // random int between 0 and 4 inclusive
+            if (flockFormation == 0) {
+                // formation 0: two bird diagonal
+                activeBirds.add(new Bird(-9, 0, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-8, -1, Math.random()*100, elapsedTimeMillis));
+            }
+            else if (flockFormation == 1) {
+                // formation 1: solo bird
+                activeBirds.add(new Bird(-8, 0, Math.random()*100, elapsedTimeMillis));
+            }
+            else if (flockFormation == 2) {
+                // formation 2: two bird vertical
+                activeBirds.add(new Bird(-8, -1, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-8, 0, Math.random()*100, elapsedTimeMillis));
+            }
+            else if (flockFormation == 3) {
+                // formation 3: three bird diagonal
+                activeBirds.add(new Bird(-10, -2, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-9, -1, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-8, 0, Math.random()*100, elapsedTimeMillis));
+            }
+            else {
+                // formation 4: three bird bump
+                activeBirds.add(new Bird(-10, 0, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-9, 1, Math.random()*100, elapsedTimeMillis));
+                activeBirds.add(new Bird(-8, 0, Math.random()*100, elapsedTimeMillis));
+            }
+        }
+
         drawBlanket(g2, 11.5, 2);
         drawTree(g2, 14, 3);
         drawTree(g2, 2, 3);
@@ -145,22 +217,30 @@ public class PicnicScene extends JPanel {
      * Draws the bird using two different arcs.
      * It is animated by adjusting the location of the control points.
      * 
-     * @param g2 The drawing context whose transform will be set.
+     * @param g2                The drawing context whose transform will be set.
+     * @param xOffset           The horizontal offset of the bird.
+     * @param yOffset           The vertical offset of the bird.
+     * @param animationOffset   The additional time delay (in milliseconds) used when calculating the curve arcs.
+     * @param spawnTimeMillis   The time at which the bird was first spawned (in milliseconds).
+     * 
+     * @return                  Boolean for if the bird should be destroyed or not (if it is too far off-screen).
      */
-    private void drawBird(Graphics2D g2) {
+    private boolean drawBird(Graphics2D g2, double xOffset, double yOffset, double animationOffset, long spawnTimeMillis) {
         AffineTransform cs = g2.getTransform(); // Save current "coordinate system" transform
         Stroke initialStroke = g2.getStroke(); // Saving the current stroke to restore later
 
-        // bird will cross the screen every 3 seconds, 180 frames are needed to cross
+        g2.translate(xOffset, yOffset); // offset bird by translating before drawing
+
+        // bird will cross the screen every 100 seconds, 600 frames are needed to cross
         // horizontally, the bird should cover 20 units with 2 units off screen on both sides,
         // and should start in the center
         int framesPerLoop = 100 * 60;
-        double birdX = ((elapsedTimeMillis * 0.06 + framesPerLoop / 2) % framesPerLoop) / (double) framesPerLoop * 20.0 - 2;
+        double birdX = ((elapsedTimeMillis - spawnTimeMillis) * 0.06 + framesPerLoop / 2) / (double) framesPerLoop * 20.0 - 2;
         
         // bird will fly in a wave pattern through the sky vertically
         // the factor out front adjusts how high and low the bird goes,
         // and the factor inside adjusts how fast it swings up and down
-        double birdY = 0.5 * Math.sin(elapsedTimeMillis * 0.06 * 0.01) + 7.5;
+        double birdY = 0.5 * Math.sin((elapsedTimeMillis - spawnTimeMillis) * 0.06 * 0.01) + 7.5;
 
         // adjust coordinate system to center bird
         g2.translate(birdX, birdY);
@@ -172,9 +252,9 @@ public class PicnicScene extends JPanel {
         // drawing the bird with arcs
         Path2D birdPath = new Path2D.Double();
         birdPath.moveTo(0, 0);
-        birdPath.curveTo(birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTimeMillis * 0.06 * 0.1));
+        birdPath.curveTo(birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1));
         birdPath.moveTo(0, 0);
-        birdPath.curveTo(-birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTimeMillis * 0.06 * 0.1));
+        birdPath.curveTo(-birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(((elapsedTimeMillis - spawnTimeMillis) + animationOffset) * 0.06 * 0.1));
 
         // adjusting arc size and color
         BasicStroke birdStroke = new BasicStroke(3 * pixelSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -184,6 +264,8 @@ public class PicnicScene extends JPanel {
 
         g2.setTransform(cs); // Restore previous coordinate system
         g2.setStroke(initialStroke); // Restore previous stroke
+
+        return birdX + xOffset > 20; // Return true if bird is off-screen so it gets marked for destruction
     }
 
     /**
@@ -401,7 +483,7 @@ public class PicnicScene extends JPanel {
      * @param g2            The drawing context whose transform will be set.
      * @param x             The x-location for the midpoint of the sun.
      * @param y             The y-location for the midpoint of the sun.
-     * @param sizeRange     The largest possible random value for the size.
+     * @param sizeRange     The largest possible value for the size.
      *                      Range of size values will be 
      *                      (base value - sizeRange, base value + sizeRange).
      */

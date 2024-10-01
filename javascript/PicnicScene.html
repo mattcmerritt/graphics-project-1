@@ -39,6 +39,8 @@
     var frameNumber = 0; // Which frame we are on... Used in animation.
     var elapsedTime = 0; // Used by animations to have consistent speed with Java version.
     var startingTime = 0; // Used to calculate elapsed time.
+
+    var activeBirds; // List of birds currently being drawn.
       
     /**
      *  The draw() function is called by init() after the page loads,
@@ -82,26 +84,83 @@
    * Draws the entire picnic scene using the other functions defined below.
    */
   function drawMainScene() {
-      graphics.save();
+    graphics.save();
 
-      // calls to additional functions to draw shapes and components
-      drawBackground();
-      drawLake();
-      drawSun(11, 10, 0.25);
-      drawBird();
-      drawBlanket(11.5, 2);
-      drawTree(14, 3);
-      drawTree(2, 3);
-      drawSeesaw(4.425, 0.5);
+    // calls to additional functions to draw shapes and components
+    drawBackground();
+    drawLake();
+    drawSun(11, 10, 0.25);
+    
+    // flock behavior
+    // draw birds
+    var areBirdsOffScreen = []; // create parallel array to hold if each bird should be destroyed
+    for(var birdInfo of activeBirds) {
+      areBirdsOffScreen.push(drawBird(birdInfo.xOffset, birdInfo.yOffset, birdInfo.animationOffset, birdInfo.spawnTimeMillis)); // draws bird and populates areBirdsOffScreen
+    }
+    // delete birds that are far off-screen
+    var i = 0;
+    while(i < activeBirds.length) {
+      // delete bird if marked as true
+      if(areBirdsOffScreen[i]) {
+        activeBirds.splice(i, 1);
+        areBirdsOffScreen.splice(i, 1);
+      }
+      // else move to next bird
+      else {
+        i++;
+      }
+    }
+    // repopulate birds if none remain
+    if(activeBirds.length == 0) {
+      var flockFormation = Math.floor(Math.random() * 5); // random int between 0 and 4 inclusive
+      if (flockFormation == 0) {
+        // formation 0: two bird diagonal
+        activeBirds.push({xOffset:-9, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-8, yOffset:-1, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+      }
+      else if (flockFormation == 1) {
+        // formation 1: solo bird
+        activeBirds.push({xOffset:-8, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+      }
+      else if (flockFormation == 2) {
+        // formation 2: two bird vertical
+        activeBirds.push({xOffset:-8, yOffset:-1, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-8, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+      }
+      else if (flockFormation == 3) {
+        // formation 3: three bird diagonal
+        activeBirds.push({xOffset:-10, yOffset:-2, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-9, yOffset:-1, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-8, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+      }
+      else {
+        // formation 4: three bird bump
+        activeBirds.push({xOffset:-10, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-9, yOffset:-1, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+        activeBirds.push({xOffset:-8, yOffset:0, animationOffset:Math.random()*100, spawnTimeMillis:elapsedTime});
+      }
+    }
 
-      graphics.restore();
+    drawBlanket(11.5, 2);
+    drawTree(14, 3);
+    drawTree(2, 3);
+    drawSeesaw(4.425, 0.5);
+
+    graphics.restore();
   }
 
   /**
    * Draws the bird using two different arcs.
    * It is animated by adjusting the location of the control points.
+   * 
+   * @param xOffset           The horizontal offset of the bird.
+   * @param yOffset           The vertical offset of the bird.
+   * @param animationOffset   The additional time delay (in milliseconds) used when calculating the curve arcs.
+   * @param spawnTimeMillis   The time at which the bird was first spawned (in milliseconds).
+   * 
+   * @return                  Boolean for if the bird should be destroyed or not (if it is too far off-screen).
    */
-  function drawBird() {
+  function drawBird(xOffset, yOffset, animationOffset, spawnTimeMillis) {
     graphics.save(); // Save current "coordinate system" transform
 
     // Saving the current stroke to restore later
@@ -110,16 +169,18 @@
     var initialStrokeCap = graphics.lineCap;
     var initialStrokeJoin = graphics.lineJoin;
 
-    // bird will cross the screen every 3 seconds, 180 frames are needed to cross
+    graphics.translate(xOffset, yOffset); // offset bird by translating before drawing
+
+    // bird will cross the screen every 100 seconds, 600 frames are needed to cross
     // horizontally, the bird should cover 20 units with 2 units off screen on both sides,
     // and should start in the center
     var framesPerLoop = 100 * 60;
-    var birdX = ((elapsedTime * 0.06 + framesPerLoop / 2) % framesPerLoop) / framesPerLoop * 20.0 - 2;
+    var birdX = ((elapsedTime - spawnTimeMillis) * 0.06 + framesPerLoop / 2) / framesPerLoop * 20.0 - 2;
 
     // bird will fly in a wave pattern through the sky vertically
     // the factor out front adjusts how high and low the bird goes,
     // and the factor inside adjusts how fast it swings up and down
-    var birdY = 0.5 * Math.sin(elapsedTime * 0.06 * 0.01) + 7.5;
+    var birdY = 0.5 * Math.sin((elapsedTime - spawnTimeMillis) * 0.06 * 0.01) + 7.5;
 
     // adjust coordinate system to center bird
     graphics.translate(birdX, birdY);
@@ -137,9 +198,9 @@
     // drawing the bird with arcs
     graphics.beginPath();
     graphics.moveTo(0, 0);
-    graphics.bezierCurveTo(birdWingLength / 4, birdWingHeight * Math.sin(elapsedTime * 0.06 * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTime * 0.06 * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTime * 0.06 * 0.1));
+    graphics.bezierCurveTo(birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1));
     graphics.moveTo(0, 0);
-    graphics.bezierCurveTo(-birdWingLength / 4, birdWingHeight * Math.sin(elapsedTime * 0.06 * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTime * 0.06 * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTime * 0.06 * 0.1));
+    graphics.bezierCurveTo(-birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(((elapsedTime - spawnTimeMillis) + animationOffset) * 0.06 * 0.1));
     graphics.stroke();
 
     // Restore previous stroke
@@ -149,6 +210,8 @@
     graphics.lineJoin = initialStrokeJoin;
 
     graphics.restore(); // Restore previous coordinate system
+
+    return birdX + xOffset > 20; // Return true if bird is off-screen so it gets marked for destruction
   }
 
   /**
@@ -366,7 +429,7 @@
    * 
    * @param x             The x-location for the midpoint of the sun.
    * @param y             The y-location for the midpoint of the sun.
-   * @param sizeRange     The largest possible random value for the size.
+   * @param sizeRange     The largest possible value for the size.
    *                      Range of size values will be 
    *                      (base value - sizeRange, base value + sizeRange).
    */
@@ -671,6 +734,8 @@
                "Canvas graphics is not supported.<br>" +
                "An error occurred while initializing graphics.";
         }
+        activeBirds = []; // initialize bird list
+        activeBirds.push({xOffset:0, yOffset:0, animationOffset:0, spawnTimeMillis:0}); // add default bird that appears in the middle of the screen
         addGraphicsContextExtras(graphics);  // Add the extra features to the graphics context
         draw();  // Call draw() to draw on the canvas.
         if (!window.requestAnimationFrame) { // This is for Internet Explorer 9
