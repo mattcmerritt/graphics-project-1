@@ -43,8 +43,9 @@ public class PicnicScene extends JPanel {
                 panel.frameNumber++;
                 panel.elapsedTimeMillis = System.currentTimeMillis() - startTime;
 
-                // TODO: Determine why Java is running significantly slower than expected.
-                // This should return 60, but it is giving roughly 32 FPS instead.
+                // For future: Determine why Java is running significantly slower than expected.
+
+                // This should display 60 FPS, but it is giving roughly 32 FPS instead.
                 // System.out.println(panel.frameNumber / (panel.elapsedTimeMillis / 1000.0));
                 // Found a workaround by using elapsed time instead of frame count for animations.
 
@@ -58,7 +59,7 @@ public class PicnicScene extends JPanel {
 
     private float pixelSize; // This is the measure of a pixel in the coordinate system
                              // set up by calling the applyLimits method. It can be used
-                             // for setting line widths, for example.6
+                             // for setting line widths, for example.
 
     private int frameNumber; // The current number of frames elasped during the program.
                              // Used to determine how far along animations are.
