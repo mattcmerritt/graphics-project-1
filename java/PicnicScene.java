@@ -42,9 +42,12 @@ public class PicnicScene extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 panel.frameNumber++;
                 panel.elapsedTimeMillis = System.currentTimeMillis() - startTime;
+
                 // TODO: Determine why Java is running significantly slower than expected.
                 // This should return 60, but it is giving roughly 32 FPS instead.
                 // System.out.println(panel.frameNumber / (panel.elapsedTimeMillis / 1000.0));
+                // Found a workaround by using elapsed time instead of frame count for animations.
+
                 panel.repaint();
             }
         });
@@ -151,12 +154,12 @@ public class PicnicScene extends JPanel {
         // horizontally, the bird should cover 20 units with 2 units off screen on both sides,
         // and should start in the center
         int framesPerLoop = 100 * 60;
-        double birdX = ((frameNumber + framesPerLoop / 2) % framesPerLoop) / (double) framesPerLoop * 20.0 - 2;
+        double birdX = ((elapsedTimeMillis * 0.06 + framesPerLoop / 2) % framesPerLoop) / (double) framesPerLoop * 20.0 - 2;
         
         // bird will fly in a wave pattern through the sky vertically
         // the factor out front adjusts how high and low the bird goes,
         // and the factor inside adjusts how fast it swings up and down
-        double birdY = 0.5 * Math.sin(frameNumber * 0.01) + 7.5;
+        double birdY = 0.5 * Math.sin(elapsedTimeMillis * 0.06 * 0.01) + 7.5;
 
         // adjust coordinate system to center bird
         g2.translate(birdX, birdY);
@@ -168,9 +171,9 @@ public class PicnicScene extends JPanel {
         // drawing the bird with arcs
         Path2D birdPath = new Path2D.Double();
         birdPath.moveTo(0, 0);
-        birdPath.curveTo(birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+        birdPath.curveTo(birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), 3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTimeMillis * 0.06 * 0.1));
         birdPath.moveTo(0, 0);
-        birdPath.curveTo(-birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(frameNumber * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(frameNumber * 0.1));
+        birdPath.curveTo(-birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), -3 * birdWingLength / 4, birdWingHeight * Math.sin(elapsedTimeMillis * 0.06 * 0.1), -birdWingLength, birdWingHeight / 2 * Math.sin(elapsedTimeMillis * 0.06 * 0.1));
 
         // adjusting arc size and color
         BasicStroke birdStroke = new BasicStroke(3 * pixelSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -252,7 +255,7 @@ public class PicnicScene extends JPanel {
         // rotate the transform based on the current number of frames
         // the number inside the sine function can be adjusted to control speed, 
         // and the angle controls the amplitude of the rotation
-        double seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+        double seesawRotation = Math.sin(elapsedTimeMillis * 0.06 * 0.1) * Math.PI / 12;
         g2.rotate(seesawRotation);
 
         // add the animated bar to the seesaw
@@ -353,7 +356,7 @@ public class PicnicScene extends JPanel {
             }
 
             // need to calculate the y-coordinate for the person's hand based on the rotation
-            double seesawRotation = Math.sin(frameNumber * 0.15) * Math.PI / 12;
+            double seesawRotation = Math.sin(elapsedTimeMillis * 0.06 * 0.1) * Math.PI / 12;
             double relativeHandX = 0.5 * (facingLeft ? -1 : 1);
             double relativeHandY = 0;
             double handY = Math.sin(seesawRotation) * relativeHandX + Math.cos(seesawRotation) * relativeHandY;
@@ -408,8 +411,8 @@ public class PicnicScene extends JPanel {
         g2.translate(x, y);
 
         // outermost circle
-        int alphaFluctuation = (int) (Math.sin(frameNumber * 0.1) * 15); // can't be greater than 15
-        double sizeFluctuation = Math.sin(frameNumber * 0.01) * sizeRange;
+        int alphaFluctuation = (int) (Math.sin(elapsedTimeMillis * 0.06 * 0.1) * 15); // can't be greater than 15
+        double sizeFluctuation = Math.sin(elapsedTimeMillis * 0.06 * 0.01) * sizeRange;
 
         g2.setPaint(new Color(255, 255, 0, 50 + alphaFluctuation));
         g2.fill(new Ellipse2D.Double(-1.5 - (sizeFluctuation / 2.0), -1.5 - (sizeFluctuation / 2.0), 3 + sizeFluctuation, 3 + sizeFluctuation));
